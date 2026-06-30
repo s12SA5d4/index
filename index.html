@@ -2,487 +2,204 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>粒子实验室</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>星空连线</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0a0a1a;
       overflow: hidden;
       touch-action: none;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
     }
     #canvas {
       display: block;
       width: 100%;
       height: 100vh;
     }
-    .controls {
-      position: fixed;
-      bottom: max(20px, env(safe-area-inset-bottom));
-      left: 16px;
-      right: 16px;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      z-index: 100;
-    }
-    .control-btn {
-      flex: 1;
-      padding: 14px 8px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
-      color: rgba(255,255,255,0.6);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      min-width: 0;
-    }
-    .control-btn.active {
-      background: rgba(186, 137, 255, 0.3);
-      border-color: rgba(186, 137, 255, 0.6);
-      color: #fff;
-      transform: scale(1.05);
-    }
-    .control-btn:active {
-      transform: scale(0.95);
-    }
-    .control-btn .icon {
-      font-size: 20px;
-    }
-    .control-btn .text {
-      font-size: 11px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
     .hint {
-      position: fixed;
-      top: max(20px, env(safe-area-inset-top));
+      position: absolute;
+      bottom: 40px;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255,255,255,0.4);
-      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
       pointer-events: none;
-      text-align: center;
-      z-index: 100;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      animation: pulse 3s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.8; }
     }
     .stats {
-      position: fixed;
-      top: max(20px, env(safe-area-inset-top));
-      right: 16px;
-      color: rgba(255,255,255,0.4);
-      font-size: 11px;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
       font-family: monospace;
       pointer-events: none;
-      z-index: 100;
-    }
-    .mode-indicator {
-      position: fixed;
-      top: max(60px, calc(env(safe-area-inset-top) + 40px));
-      left: 16px;
-      padding: 6px 12px;
-      background: rgba(186, 137, 255, 0.2);
-      border-radius: 20px;
-      color: rgba(255,255,255,0.8);
-      font-size: 12px;
-      pointer-events: none;
-      z-index: 100;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .mode-indicator.show {
-      opacity: 1;
     }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  
-  <div class="hint">👆 按住创造力场 · 拖动移动 · 松手爆发</div>
-  <div class="stats">
-    粒子: <span id="particleCount">0</span><br>
-    连线: <span id="lineCount">0</span>
-  </div>
-  <div class="mode-indicator" id="modeIndicator">吸引模式</div>
-  
-  <div class="controls">
-    <button class="control-btn active" onclick="setMode('attract')">
-      <span class="icon">🌀</span>
-      <span class="text">吸引</span>
-    </button>
-    <button class="control-btn" onclick="setMode('repel')">
-      <span class="icon">💥</span>
-      <span class="text">排斥</span>
-    </button>
-    <button class="control-btn" onclick="setMode('connect')">
-      <span class="icon">🔗</span>
-      <span class="text">连线</span>
-    </button>
-    <button class="control-btn" onclick="setMode('merge')">
-      <span class="icon">⚡</span>
-      <span class="text">融合</span>
-    </button>
-    <button class="control-btn" onclick="addParticles(15)">
-      <span class="icon">➕</span>
-      <span class="text">加粒子</span>
-    </button>
-    <button class="control-btn" onclick="resetParticles()">
-      <span class="icon">🔄</span>
-      <span class="text">重置</span>
-    </button>
-  </div>
+  <div class="hint">✨ 点击屏幕创造星星，拖动连接它们</div>
+  <div class="stats">星星: <span id="starCount">0</span></div>
 
   <script>
     const canvas = document.getElementById('canvas')
     const ctx = canvas.getContext('2d')
-    const particles = []
+    const stars = []
     const lines = []
-    const explosions = []
 
     let width, height
-    let mouseX = -1000, mouseY = -1000
-    let isPressing = false
-    let mode = 'attract'
-    let pressStartTime = 0
+    let lastTouchX, lastTouchY
+    let isDrawing = false
 
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
       canvas.width = width
       canvas.height = height
-      if (particles.length === 0) initParticles()
+      initStars()
     }
 
-    function initParticles() {
-      particles.length = 0
+    function initStars() {
+      stars.length = 0
       lines.length = 0
-      const count = Math.floor((width * height) / 5000)
+      const count = Math.floor((width * height) / 15000)
       for (let i = 0; i < count; i++) {
-        particles.push(createParticle())
-      }
-      updateStats()
-    }
-
-    function createParticle(x, y) {
-      const colors = [
-        '255, 255, 255',
-        '186, 137, 255',
-        '126, 187, 255',
-        '139, 233, 253',
-        '255, 159, 183',
-        '255, 214, 153',
-        '165, 243, 191',
-        '255, 193, 7'
-      ]
-      return {
-        x: x ?? Math.random() * width,
-        y: y ?? Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: (Math.random() - 0.5) * 0.6,
-        size: Math.random() * 2.5 + 1,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        opacity: Math.random() * 0.5 + 0.3,
-        trail: [],
-        charge: Math.random() > 0.5 ? 1 : -1
-      }
-    }
-
-    function addParticles(count) {
-      for (let i = 0; i < count; i++) {
-        particles.push(createParticle(mouseX + (Math.random() - 0.5) * 60, mouseY + (Math.random() - 0.5) * 60))
-      }
-      updateStats()
-    }
-
-    function resetParticles() {
-      initParticles()
-    }
-
-    function updateStats() {
-      document.getElementById('particleCount').textContent = particles.length
-      document.getElementById('lineCount').textContent = lines.length
-    }
-
-    function createExplosion(x, y) {
-      const pressDuration = Date.now() - pressStartTime
-      const intensity = Math.min(pressDuration / 800, 3)
-      const count = Math.floor(25 * intensity) + Math.floor(Math.random() * 15)
-      
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 / count) * i + Math.random() * 0.8
-        const speed = (3 + Math.random() * 4) * intensity
-        explosions.push({
-          x, y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          size: Math.random() * 3 + 1,
-          color: createParticle().color,
-          opacity: 1,
-          life: 50 + Math.random() * 30,
-          type: Math.random() > 0.5 ? 'spark' : 'ring'
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: Math.random() * 2 + 0.5,
+          opacity: Math.random() * 0.5 + 0.2,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3
         })
       }
+      document.getElementById('starCount').textContent = stars.length
     }
 
-    function setMode(newMode) {
-      mode = newMode
-      document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'))
-      event.target.classList.add('active')
-      
-      const modeNames = {
-        attract: '吸引模式',
-        repel: '排斥模式',
-        connect: '连线模式',
-        merge: '融合模式'
+    function addStar(x, y) {
+      stars.push({
+        x, y,
+        size: Math.random() * 3 + 1,
+        opacity: 1,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        isNew: true
+      })
+      document.getElementById('starCount').textContent = stars.length
+    }
+
+    function connectStars(x1, y1, x2, y2) {
+      let nearest1 = null, nearest2 = null
+      let dist1 = Infinity, dist2 = Infinity
+
+      stars.forEach(s => {
+        const d1 = Math.hypot(s.x - x1, s.y - y1)
+        const d2 = Math.hypot(s.x - x2, s.y - y2)
+        if (d1 < dist1) { dist1 = d1; nearest1 = s }
+        if (d2 < dist2) { dist2 = d2; nearest2 = s }
+      })
+
+      if (nearest1 && nearest2 && nearest1 !== nearest2 && dist1 < 80 && dist2 < 80) {
+        lines.push({
+          x1: nearest1.x, y1: nearest1.y,
+          x2: nearest2.x, y2: nearest2.y,
+          opacity: 0.6,
+          life: 100
+        })
       }
-      const indicator = document.getElementById('modeIndicator')
-      indicator.textContent = modeNames[newMode]
-      indicator.classList.add('show')
-      setTimeout(() => {
-        indicator.classList.remove('show')
-      }, 1500)
     }
 
     function animate() {
-      ctx.fillStyle = 'rgba(10, 10, 26, 0.15)'
+      ctx.fillStyle = 'rgba(10, 10, 26, 0.1)'
       ctx.fillRect(0, 0, width, height)
 
-      if (isPressing) {
-        const pressDuration = Date.now() - pressStartTime
-        const intensity = Math.min(pressDuration / 800, 2)
-        const radius = 80 + intensity * 40
-        
-        const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, radius)
-        const colors = {
-          attract: ['rgba(186, 137, 255, 0.4)', 'rgba(126, 187, 255, 0.15)', 'rgba(186, 137, 255, 0)'],
-          repel: ['rgba(255, 100, 100, 0.4)', 'rgba(255, 150, 100, 0.15)', 'rgba(255, 100, 100, 0)'],
-          connect: ['rgba(139, 233, 253, 0.4)', 'rgba(126, 187, 255, 0.15)', 'rgba(139, 233, 253, 0)'],
-          merge: ['rgba(255, 214, 153, 0.4)', 'rgba(255, 159, 183, 0.15)', 'rgba(255, 214, 153, 0)']
+      stars.forEach(s => {
+        s.x += s.vx
+        s.y += s.vy
+
+        if (s.x < 0) s.x = width
+        if (s.x > width) s.x = 0
+        if (s.y < 0) s.y = height
+        if (s.y > height) s.y = 0
+
+        if (s.isNew) {
+          s.opacity = Math.min(1, s.opacity + 0.05)
+          if (s.opacity >= 1) s.isNew = false
         }
-        const c = colors[mode]
-        gradient.addColorStop(0, c[0])
-        gradient.addColorStop(0.5, c[1])
-        gradient.addColorStop(1, c[2])
-        ctx.fillStyle = gradient
+
         ctx.beginPath()
-        ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2)
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`
         ctx.fill()
 
-        ctx.strokeStyle = c[0]
-        ctx.lineWidth = 1
-        for (let i = 1; i <= 3; i++) {
-          ctx.beginPath()
-          ctx.arc(mouseX, mouseY, (radius / 3) * i, 0, Math.PI * 2)
-          ctx.stroke()
-        }
-      }
+        ctx.beginPath()
+        ctx.arc(s.x, s.y, s.size * 2, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity * 0.3})`
+        ctx.fill()
+      })
 
-      particles.forEach((p, i) => {
-        if (isPressing) {
-          const dx = mouseX - p.x
-          const dy = mouseY - p.y
-          const dist = Math.hypot(dx, dy)
-          
-          if (dist < 220 && dist > 0) {
-            let force = (220 - dist) / 220
-            
-            if (mode === 'attract') {
-              force *= 1.4
-            } else if (mode === 'repel') {
-              force *= -1.6
-            } else if (mode === 'connect') {
-              force *= 0.4
-            } else if (mode === 'merge') {
-              force *= 1.6
-            }
-            
-            p.vx += (dx / dist) * force
-            p.vy += (dy / dist) * force
-          }
-        }
-
-        particles.slice(i + 1).forEach(p2 => {
-          const dx = p2.x - p.x
-          const dy = p2.y - p.y
-          const dist = Math.hypot(dx, dy)
-          
+      stars.forEach((s1, i) => {
+        stars.slice(i + 1).forEach(s2 => {
+          const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y)
           if (dist < 100) {
-            if (mode === 'connect') {
-              if (dist < 70) {
-                let exists = false
-                lines.forEach(l => {
-                  if ((l.p1 === p && l.p2 === p2) || (l.p1 === p2 && l.p2 === p)) {
-                    exists = true
-                  }
-                })
-                if (!exists && Math.random() > 0.96) {
-                  lines.push({ p1: p, p2: p2, life: 120, color: p.color })
-                }
-              }
-            }
-            
-            if (mode === 'merge' && dist < 12) {
-              p.size = Math.max(p.size, p2.size) + 0.4
-              p.opacity = Math.min(1, p.opacity + 0.1)
-              const idx = particles.indexOf(p2)
-              if (idx > -1) particles.splice(idx, 1)
-              updateStats()
-              return
-            }
-
-            const chargeForce = (p.charge === p2.charge ? 1 : -1) * 0.04 * (100 - dist) / 100
-            p.vx += (dx / dist) * chargeForce
-            p.vy += (dy / dist) * chargeForce
+            ctx.beginPath()
+            ctx.moveTo(s1.x, s1.y)
+            ctx.lineTo(s2.x, s2.y)
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 * (1 - dist / 100)})`
+            ctx.lineWidth = 0.5
+            ctx.stroke()
           }
         })
-
-        p.vx *= 0.96
-        p.vy *= 0.96
-        p.x += p.vx
-        p.y += p.vy
-
-        if (p.x < -50) p.x = width + 50
-        if (p.x > width + 50) p.x = -50
-        if (p.y < -50) p.y = height + 50
-        if (p.y > height + 50) p.y = -50
-
-        p.trail.push({ x: p.x, y: p.y })
-        if (p.trail.length > 10) p.trail.shift()
-
-        p.trail.forEach((t, j) => {
-          const trailOpacity = p.opacity * (j / p.trail.length) * 0.4
-          ctx.beginPath()
-          ctx.arc(t.x, t.y, p.size * (j / p.trail.length), 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${p.color}, ${trailOpacity})`
-          ctx.fill()
-        })
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${p.color}, ${p.opacity})`
-        ctx.fill()
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${p.color}, ${p.opacity * 0.15})`
-        ctx.fill()
-
-        if (p.size > 3.5) {
-          ctx.beginPath()
-          ctx.arc(p.x, p.y, p.size * 1.1, 0, Math.PI * 2)
-          ctx.strokeStyle = `rgba(${p.color}, ${p.opacity * 0.3})`
-          ctx.lineWidth = 1
-          ctx.stroke()
-        }
       })
 
       lines.forEach((l, i) => {
         l.life--
-        if (l.life <= 0 || particles.indexOf(l.p1) === -1 || particles.indexOf(l.p2) === -1) {
+        if (l.life <= 0) {
           lines.splice(i, 1)
-          updateStats()
-          return
-        }
-
-        const dx = l.p2.x - l.p1.x
-        const dy = l.p2.y - l.p1.y
-        const dist = Math.hypot(dx, dy)
-        
-        if (dist > 130) {
-          lines.splice(i, 1)
-          updateStats()
           return
         }
 
         ctx.beginPath()
-        ctx.moveTo(l.p1.x, l.p1.y)
-        ctx.lineTo(l.p2.x, l.p2.y)
-        ctx.strokeStyle = `rgba(${l.color}, ${l.life / 120 * 0.4})`
-        ctx.lineWidth = 0.5 + Math.sin(l.life / 8) * 0.2
+        ctx.moveTo(l.x1, l.y1)
+        ctx.lineTo(l.x2, l.y2)
+        ctx.strokeStyle = `rgba(186, 137, 255, ${l.opacity * (l.life / 100)})`
+        ctx.lineWidth = 1
         ctx.stroke()
-
-        const midX = (l.p1.x + l.p2.x) / 2
-        const midY = (l.p1.y + l.p2.y) / 2
-        ctx.beginPath()
-        ctx.arc(midX, midY, 1, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${l.color}, ${l.life / 120 * 0.6})`
-        ctx.fill()
-      })
-
-      explosions.forEach((e, i) => {
-        e.x += e.vx
-        e.y += e.vy
-        e.vx *= 0.93
-        e.vy *= 0.93
-        e.life--
-        e.opacity = Math.max(0, e.life / 80)
-
-        if (e.life <= 0) {
-          explosions.splice(i, 1)
-          return
-        }
-
-        if (e.type === 'spark') {
-          ctx.beginPath()
-          ctx.arc(e.x, e.y, e.size * e.opacity, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${e.color}, ${e.opacity})`
-          ctx.fill()
-        } else {
-          ctx.beginPath()
-          ctx.arc(e.x, e.y, e.size * (1 + (80 - e.life) / 40), 0, Math.PI * 2)
-          ctx.strokeStyle = `rgba(${e.color}, ${e.opacity * 0.5})`
-          ctx.lineWidth = 1
-          ctx.stroke()
-        }
       })
 
       requestAnimationFrame(animate)
     }
 
-    function handleStart(e) {
-      isPressing = true
-      pressStartTime = Date.now()
-      const touch = e.touches ? e.touches[0] : e
-      mouseX = touch.clientX
-      mouseY = touch.clientY
-    }
+    canvas.addEventListener('pointerdown', (e) => {
+      isDrawing = true
+      lastTouchX = e.clientX
+      lastTouchY = e.clientY
+      addStar(e.clientX, e.clientY)
+    })
 
-    function handleMove(e) {
-      const touch = e.touches ? e.touches[0] : e
-      mouseX = touch.clientX
-      mouseY = touch.clientY
-    }
+    canvas.addEventListener('pointermove', (e) => {
+      if (!isDrawing) return
 
-    function handleEnd() {
-      if (isPressing) {
-        createExplosion(mouseX, mouseY)
-      }
-      isPressing = false
-    }
+      addStar(e.clientX, e.clientY)
+      connectStars(lastTouchX, lastTouchY, e.clientX, e.clientY)
 
-    canvas.addEventListener('mousedown', handleStart)
-    canvas.addEventListener('mousemove', handleMove)
-    canvas.addEventListener('mouseup', handleEnd)
-    canvas.addEventListener('mouseleave', handleEnd)
+      lastTouchX = e.clientX
+      lastTouchY = e.clientY
+    })
 
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault()
-      handleStart(e)
-    }, { passive: false })
+    canvas.addEventListener('pointerup', () => {
+      isDrawing = false
+    })
 
-    canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault()
-      handleMove(e)
-    }, { passive: false })
-
-    canvas.addEventListener('touchend', handleEnd)
+    canvas.addEventListener('pointerleave', () => {
+      isDrawing = false
+    })
 
     window.addEventListener('resize', resize)
     resize()
