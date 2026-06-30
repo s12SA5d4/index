@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>摆烂日记</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      min-height: 100vh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #fff;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .header {
+      padding: 24px 20px;
+      background: linear-gradient(135deg, #7c5cff 0%, #9d7bff 100%);
+      color: #fff;
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 4px 16px rgba(124, 92, 255, 0.3);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .date-text {
+      font-size: 13px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .mood-icon {
+      font-size: 24px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .header-subtitle {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .stats-card {
+      margin: -20px 16px 16px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #7c5cff;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .section {
+      padding: 0 16px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1f1f1f;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: #7c5cff;
+      border-radius: 2px;
+    }
+
+    .mood-selector {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .mood-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      border: 2px solid #f0f0f0;
+      background: #fff;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .mood-btn:hover,
+    .mood-btn.active {
+      border-color: #7c5cff;
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(124, 92, 255, 0.2);
+    }
+
+    .mood-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 8px;
+      background: #7c5cff;
+      border-radius: 50%;
+    }
+
+    .mood-label {
+      font-size: 10px;
+      color: #999;
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .input-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid #f0f0f0;
+    }
+
+    .input-label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 100px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1f1f1f;
+      resize: none;
+      font-family: inherit;
+    }
+
+    .textarea::placeholder {
+      color: #ccc;
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: #ccc;
+      text-align: right;
+      margin-top: 8px;
+    }
+
+    .action-btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #7c5cff 0%, #9d7bff 100%);
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .quote-card {
+      background: linear-gradient(135deg, #fff9f9 0%, #f0f4ff 100%);
+      border-radius: 16px;
+      padding: 16px;
+      border-left: 4px solid #7c5cff;
+    }
+
+    .quote-text {
+      font-size: 14px;
+      color: #555;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .quote-author {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+      text-align: right;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .history-item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid #f0f0f0;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .history-date {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .history-mood {
+      font-size: 20px;
+    }
+
+    .history-content {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .bottom-space {
+      height: 40px;
+    }
+
+    @media (max-width: 375px) {
+      .header {
+        padding: 20px 16px;
+      }
+
+      .header-title {
+        font-size: 22px;
+      }
+
+      .mood-btn {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <div class="header-top">
+        <span class="date-text" id="currentDate"></span>
+        <span class="mood-icon">😴</span>
+      </div>
+      <div class="header-title">摆烂日记</div>
+      <div class="header-subtitle">记录今天也没变好的一天</div>
+    </div>
+
+    <div class="stats-card">
+      <div class="stat-item">
+        <div class="stat-value">12</div>
+        <div class="stat-label">已摆烂天数</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">32%</div>
+        <div class="stat-label">今日精力</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">0</div>
+        <div class="stat-label">待办完成</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">今日心情</div>
+      <div class="mood-selector">
+        <div class="mood-btn" data-mood="happy" onclick="selectMood(this)">😄</div>
+        <div class="mood-btn" data-mood="calm" onclick="selectMood(this)">😌</div>
+        <div class="mood-btn active" data-mood="slack" onclick="selectMood(this)">😴</div>
+        <div class="mood-btn" data-mood="tired" onclick="selectMood(this)">😫</div>
+        <div class="mood-btn" data-mood="angry" onclick="selectMood(this)">😤</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">摆烂记录</div>
+      <div class="input-card">
+        <label class="input-label">今天做了什么（没做什么也可以）</label>
+        <textarea class="textarea" id="diaryInput" placeholder="今天我...（例如：在床上躺了一整天，吃了三顿饭，刷了20集剧）"></textarea>
+        <div class="char-count" id="charCount">0/500</div>
+      </div>
+      <button class="action-btn" onclick="saveDiary()" id="saveBtn">保存摆烂记录</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">今日废话</div>
+      <div class="quote-card">
+        <div class="quote-text" id="dailyQuote">“不用急，反正也不会变富”</div>
+        <div class="quote-author">— 随机生成的摆烂语录</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">摆烂历史</div>
+      <div class="history-list" id="historyList">
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <div class="empty-text">还没有摆烂记录，开始记录吧！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-space"></div>
+  </div>
+
+  <script>
+    const quotes = [
+      "不用急，反正也不会变富",
+      "你已经很努力地没努力了",
+      "躺着也是一种方向",
+      "今天不想努力，但还是打开了这个网站",
+      "承认自己普通之后，我甚至松了一口气",
+      "周末我什么都没做，但世界居然还在运行",
+      "休息不是偷懒，是为了更好地摆烂",
+      "人生不是马拉松，是在床上打滚",
+      "摆烂是一种生活态度，不是缺点",
+      "今天也没变好，但也没变坏"
+    ]
+
+    function getRandomQuote() {
+      return quotes[Math.floor(Math.random() * quotes.length)]
+    }
+
+    function updateDate() {
+      const now = new Date()
+      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options)
+    }
+
+    function selectMood(btn) {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+    }
+
+    function updateCharCount() {
+      const input = document.getElementById('diaryInput')
+      const count = document.getElementById('charCount')
+      count.textContent = `${input.value.length}/500`
+    }
+
+    function saveDiary() {
+      const content = document.getElementById('diaryInput').value.trim()
+      if (!content) {
+        alert('写点什么吧，哪怕是"今天啥也没干"')
+        return
+      }
+
+      const activeBtn = document.querySelector('.mood-btn.active')
+      const mood = activeBtn ? activeBtn.textContent : '😴'
+
+      const entry = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('zh-CN'),
+        time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        mood: mood,
+        content: content
+      }
+
+      const history = JSON.parse(localStorage.getItem('slackerDiary') || '[]')
+      history.unshift(entry)
+      localStorage.setItem('slackerDiary', JSON.stringify(history))
+
+      document.getElementById('diaryInput').value = ''
+      document.getElementById('charCount').textContent = '0/500'
+      
+      renderHistory()
+      alert('摆烂记录保存成功！🎉')
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem('slackerDiary') || '[]')
+      const list = document.getElementById('historyList')
+
+      if (history.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <div class="empty-text">还没有摆烂记录，开始记录吧！</div>
+          </div>
+        `
+        return
+      }
+
+      list.innerHTML = history.map(item => `
+        <div class="history-item">
+          <div class="history-header">
+            <span class="history-date">${item.date} ${item.time}</span>
+            <span class="history-mood">${item.mood}</span>
+          </div>
+          <div class="history-content">${item.content}</div>
+        </div>
+      `).join('')
+    }
+
+    document.getElementById('diaryInput').addEventListener('input', updateCharCount)
+    document.getElementById('dailyQuote').textContent = getRandomQuote()
+
+    updateDate()
+    renderHistory()
+  </script>
+</body>
+</html>
