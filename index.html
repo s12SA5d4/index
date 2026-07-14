@@ -1,209 +1,3140 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>星空连线</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0a0a1a;
-      overflow: hidden;
-      touch-action: none;
-    }
-    #canvas {
-      display: block;
-      width: 100%;
-      height: 100vh;
-    }
-    .hint {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255,255,255,0.5);
-      font-size: 14px;
-      pointer-events: none;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      animation: pulse 3s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 0.8; }
-    }
-    .stats {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: rgba(255,255,255,0.6);
-      font-size: 12px;
-      font-family: monospace;
-      pointer-events: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民间山野怪谈 - 潘海根著 · 阴阳先生传奇</title>
+    <meta name="description" content="《民间山野怪谈》是潘海根创作的灵异小说，讲述阴阳先生陈长生游走阴阳两界的传奇故事。本站收录完整人物、兵器、场景、招式资料。">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+QingKe+HuangYou&family=Noto+Serif+SC:wght@300;400;600;700&family=ZCOOL+XiaoWei&display=swap');
+        
+        :root {
+            --primary-dark: #0d0808;
+            --primary-darker: #1a0a0a;
+            --primary-red: #8b0000;
+            --primary-red-light: #a52a2a;
+            --accent-gold: #d4af37;
+            --accent-gold-light: #f4d03f;
+            --text-light: #e8e4d9;
+            --text-dim: #a09880;
+            --text-dark: #5a5040;
+            --bg-paper: #f5f0e6;
+            --shadow-dark: rgba(0, 0, 0, 0.8);
+            --border-ornate: #3d2314;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: var(--primary-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+        
+        /* 背景烟雾效果 */
+        .fog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .fog-layer {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(139, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 0, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+            opacity: 0.8;
+            animation: fogMove 60s linear infinite;
+        }
+        
+        @keyframes fogMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(30%, 30%) rotate(5deg); }
+        }
+        
+        /* 装饰性粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 8s infinite;
+        }
+        
+        @keyframes float {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+        }
+        
+        /* 头部 */
+        header {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: 
+                linear-gradient(180deg, 
+                    rgba(13, 8, 8, 0.95) 0%, 
+                    rgba(26, 10, 10, 0.85) 30%,
+                    rgba(139, 0, 0, 0.15) 70%,
+                    rgba(13, 8, 8, 0.98) 100%);
+            padding: 2rem;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><rect fill="none" width="60" height="60"/><circle fill="%23d4af37" cx="30" cy="30" r="0.5" opacity="0.1"/></svg>');
+            animation: starTwinkle 4s ease-in-out infinite;
+        }
+        
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        .title-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title-ornament {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            opacity: 0.6;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: clamp(3.5rem, 12vw, 10rem);
+            color: var(--accent-gold);
+            text-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.6),
+                0 0 60px rgba(139, 0, 0, 0.8),
+                0 0 100px rgba(139, 0, 0, 0.4),
+                0 6px 12px rgba(0, 0, 0, 0.9);
+            letter-spacing: 0.4em;
+            animation: titleGlow 4s ease-in-out infinite alternate;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes titleGlow {
+            0% { 
+                text-shadow: 
+                    0 0 30px rgba(212, 175, 55, 0.6),
+                    0 0 60px rgba(139, 0, 0, 0.8),
+                    0 0 100px rgba(139, 0, 0, 0.4);
+            }
+            100% { 
+                text-shadow: 
+                    0 0 40px rgba(212, 175, 55, 0.8),
+                    0 0 80px rgba(139, 0, 0, 1),
+                    0 0 120px rgba(139, 0, 0, 0.6);
+            }
+        }
+        
+        .subtitle {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: clamp(1.2rem, 4vw, 2.2rem);
+            color: var(--text-dim);
+            letter-spacing: 0.8em;
+            margin-top: 0.5rem;
+        }
+        
+        .tagline {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: var(--primary-red-light);
+            margin-top: 2rem;
+            font-style: italic;
+            max-width: 600px;
+        }
+        
+        .author-info {
+            margin-top: 3rem;
+            padding: 1.5rem 3rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(13, 8, 8, 0.6);
+        }
+        
+        .author-info .label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        .author-info .name {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2rem;
+            color: var(--accent-gold);
+        }
+        
+        .scroll-hint {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-gold);
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+        
+        .scroll-hint span {
+            font-size: 0.8rem;
+            letter-spacing: 0.3em;
+        }
+        
+        .scroll-hint .arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid var(--accent-gold);
+            border-bottom: 2px solid var(--accent-gold);
+            transform: rotate(45deg);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-8px); }
+        }
+        
+        /* 导航 */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, var(--primary-darker), rgba(13, 8, 8, 0.98));
+            border-top: 2px solid var(--primary-red);
+            border-bottom: 2px solid var(--primary-red);
+            padding: 0;
+        }
+        
+        nav::before, nav::after {
+            content: '◆';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-gold);
+            font-size: 0.8rem;
+        }
+        
+        nav::before { left: 1rem; }
+        nav::after { right: 1rem; }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+            list-style: none;
+            padding: 0.8rem 2rem;
+        }
+        
+        nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 1.1rem;
+            padding: 0.6rem 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+        
+        nav a::before {
+            content: '│';
+            position: absolute;
+            left: 0;
+            color: rgba(139, 0, 0, 0.5);
+        }
+        
+        nav a:first-child::before {
+            display: none;
+        }
+        
+        nav a:hover {
+            color: var(--accent-gold);
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        
+        nav a.active {
+            color: var(--accent-gold);
+        }
+        
+        /* 主内容 */
+        main {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* 通用区块样式 */
+        section {
+            margin: 5rem 0;
+            padding: 3rem;
+            background: 
+                linear-gradient(135deg, rgba(26, 10, 10, 0.9), rgba(13, 8, 8, 0.95));
+            border: 1px solid rgba(139, 0, 0, 0.4);
+            position: relative;
+        }
+        
+        section::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            pointer-events: none;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-number {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 5rem;
+            color: rgba(139, 0, 0, 0.2);
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        
+        h2 {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2.8rem;
+            color: var(--accent-gold);
+            position: relative;
+            display: inline-block;
+            z-index: 1;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--accent-gold), transparent);
+            margin: 0.8rem auto 0;
+        }
+        
+        .section-desc {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-top: 1rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 搜索功能 */
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            position: relative;
+        }
+        
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            border: 2px solid var(--primary-red);
+            background: rgba(13, 8, 8, 0.9);
+        }
+        
+        .search-wrapper:focus-within {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+        
+        .search-icon {
+            padding: 1rem 1.2rem;
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-family: 'Noto Serif SC', serif;
+        }
+        
+        .search-input:focus {
+            outline: none;
+        }
+        
+        .search-input::placeholder {
+            color: var(--text-dark);
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--primary-darker);
+            border: 1px solid var(--primary-red);
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .search-result-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .search-result-item:hover {
+            background: rgba(139, 0, 0, 0.2);
+        }
+        
+        .search-result-type {
+            background: rgba(139, 0, 0, 0.3);
+            color: var(--accent-gold);
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        
+        .search-result-info h4 {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        .search-result-info p {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+        
+        /* 作品简介 */
+        .intro-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+        
+        .intro-main {
+            padding-right: 2rem;
+        }
+        
+        .intro-main h3 {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.5);
+        }
+        
+        .intro-text {
+            font-size: 1.05rem;
+            line-height: 2;
+            color: var(--text-dim);
+        }
+        
+        .intro-text p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .intro-quote {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            padding: 2rem;
+            background: rgba(139, 0, 0, 0.15);
+            border-left: 4px solid var(--accent-gold);
+            margin: 2rem 0;
+            font-style: italic;
+        }
+        
+        .intro-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: rgba(139, 0, 0, 0.15);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+        }
+        
+        .stat-box .number {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 3.5rem;
+            color: var(--accent-gold);
+            line-height: 1;
+        }
+        
+        .stat-box .label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* 世界观 */
+        .worldview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        
+        .worldview-card {
+            padding: 2rem;
+            background: rgba(139, 0, 0, 0.1);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .worldview-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(139, 0, 0, 0.3);
+        }
+        
+        .worldview-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .worldview-card h4 {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.8rem;
+        }
+        
+        .worldview-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        
+        /* 人物卡片 */
+        .character-category {
+            margin-bottom: 3rem;
+        }
+        
+        .category-title {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 1.4rem;
+            color: var(--primary-red-light);
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .character-card {
+            background: linear-gradient(145deg, rgba(139, 0, 0, 0.15), rgba(13, 8, 8, 0.9));
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            padding: 1.8rem;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .character-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-gold), var(--primary-red));
+        }
+        
+        .character-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(139, 0, 0, 0.4);
+            border-color: var(--accent-gold);
+        }
+        
+        .character-card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 1.8rem;
+            color: var(--text-light);
+            flex-shrink: 0;
+        }
+        
+        .character-card h3 {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 1.6rem;
+            color: var(--accent-gold);
+            margin: 0;
+        }
+        
+        .character-card .role {
+            color: var(--primary-red-light);
+            font-size: 0.85rem;
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+        }
+        
+        .character-card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        
+        .character-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .tag {
+            background: rgba(139, 0, 0, 0.3);
+            color: var(--accent-gold);
+            padding: 0.25rem 0.7rem;
+            font-size: 0.75rem;
+            border-radius: 2px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        /* 人物关系图 */
+        .relation-map {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+        }
+        
+        .relation-map h3 {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            color: var(--accent-gold);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.3rem;
+        }
+        
+        .relation-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 2rem;
+        }
+        
+        .relation-node {
+            padding: 1rem 1.5rem;
+            background: rgba(139, 0, 0, 0.2);
+            border: 1px solid var(--primary-red);
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+            position: relative;
+        }
+        
+        .relation-node.central {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--accent-gold);
+            font-size: 1.5rem;
+            padding: 1.5rem 2rem;
+        }
+        
+        .relation-line {
+            color: var(--text-dim);
+            font-size: 1.5rem;
+        }
+        
+        /* 兵器列表 */
+        .weapon-category {
+            margin-bottom: 3rem;
+        }
+        
+        .weapon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .weapon-item {
+            display: flex;
+            gap: 1.2rem;
+            padding: 1.5rem;
+            background: rgba(139, 0, 0, 0.1);
+            border-left: 4px solid var(--accent-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .weapon-item:hover {
+            background: rgba(139, 0, 0, 0.2);
+            transform: translateX(8px);
+        }
+        
+        .weapon-icon {
+            font-size: 2.5rem;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .weapon-info h4 {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            margin-bottom: 0.4rem;
+        }
+        
+        .weapon-info p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .weapon-info .usage {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--primary-red-light);
+            background: rgba(139, 0, 0, 0.2);
+            padding: 0.2rem 0.6rem;
+        }
+        
+        /* 场景展示 */
+        .scene-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .scene-tab {
+            padding: 0.8rem 1.5rem;
+            background: rgba(139, 0, 0, 0.1);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            color: var(--text-dim);
+            cursor: pointer;
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            transition: all 0.3s ease;
+        }
+        
+        .scene-tab:hover, .scene-tab.active {
+            background: rgba(139, 0, 0, 0.3);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        
+        .scene-content {
+            display: none;
+        }
+        
+        .scene-content.active {
+            display: block;
+        }
+        
+        .scene-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .scene-card {
+            position: relative;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(139, 0, 0, 0.1));
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .scene-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .scene-card:hover::before {
+            left: 100%;
+        }
+        
+        .scene-card:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.4);
+            transform: translateY(-5px);
+        }
+        
+        .scene-card h4 {
+            font-family: 'Ma Shan Zheng', cursive;
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .scene-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        
+        .scene-card .chapter-ref {
+            display: inline-block;
+            margin-top: 0.8rem;
+            font-size: 0.8rem;
+            color: var(--primary-red-light);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            padding: 0.2rem 0.6rem;
+        }
+        
+        .scene-card .atmosphere {
+            margin-top: 0.8rem;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            font-style: italic;
+        }
+        
+        /* 招式术法 */
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .technique-card {
+            background: rgba(139, 0, 0, 0.1);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .technique-card-header {
+            background: linear-gradient(90deg, rgba(139, 0, 0, 0.3), rgba(13, 8, 8, 0.9));
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.3);
+        }
+        
+        .technique-card-header h3 {
+            font-family: 'Ma Shan Zheng', cursive;
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .technique-list {
+            padding: 1rem;
+        }
+        
+        .technique-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(13, 8, 8, 0.5);
+            border-left: 3px solid var(--accent-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .technique-item:hover {
+            background: rgba(139, 0, 0, 0.2);
+            padding-left: 1.5rem;
+        }
+        
+        .technique-item h4 {
+            color: var(--text-light);
+            font-size: 1.05rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .technique-item p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .technique-item .level {
+            display: inline-block;
+            margin-top: 0.4rem;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--accent-gold);
+        }
+        
+        /* 章节时间线 */
+        .timeline-container {
+            position: relative;
+        }
+        
+        .timeline-era {
+            margin-bottom: 3rem;
+        }
+        
+        .era-title {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 0.8rem;
+            background: rgba(139, 0, 0, 0.2);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-red), var(--accent-gold), var(--primary-red));
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            background: rgba(13, 8, 8, 0.6);
+            border: 1px solid rgba(139, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item:hover {
+            border-color: var(--accent-gold);
+            background: rgba(139, 0, 0, 0.15);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            border: 2px solid var(--primary-red);
+        }
+        
+        .timeline-item .chapter-num {
+            font-family: 'Ma Shan Zheng', cursive;
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+        }
+        
+        .timeline-item h4 {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin: 0.3rem 0;
+        }
+        
+        .timeline-item p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        /* 经典语录 */
+        .quotes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .quote-card {
+            padding: 2rem;
+            background: rgba(139, 0, 0, 0.1);
+            border: 1px solid rgba(139, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .quote-card::before {
+            content: '"';
+            position: absolute;
+            top: 0.5rem;
+            left: 1rem;
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 4rem;
+            color: rgba(139, 0, 0, 0.3);
+        }
+        
+        .quote-card .quote-text {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 1.1rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            padding-left: 1rem;
+            border-left: 2px solid var(--accent-gold);
+        }
+        
+        .quote-card .quote-source {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-align: right;
+        }
+        
+        /* 术语表 */
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .glossary-item {
+            padding: 1.2rem;
+            background: rgba(139, 0, 0, 0.1);
+            border-left: 3px solid var(--primary-red);
+        }
+        
+        .glossary-item dt {
+            color: var(--accent-gold);
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .glossary-item dd {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        /* 页脚 */
+        footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(to top, rgba(13, 8, 8, 1), rgba(13, 8, 8, 0.8), transparent);
+            border-top: 2px solid rgba(139, 0, 0, 0.5);
+        }
+        
+        .footer-ornament {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            opacity: 0.5;
+            margin-bottom: 1.5rem;
+        }
+        
+        footer .quote {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+        
+        footer .info {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+        
+        footer .copyright {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(139, 0, 0, 0.3);
+            font-size: 0.8rem;
+            color: var(--text-dark);
+        }
+        
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            max-width: 800px;
+            max-height: 90vh;
+            width: 100%;
+            overflow-y: auto;
+            background: var(--primary-darker);
+            border: 2px solid var(--primary-red);
+            position: relative;
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            pointer-events: none;
+        }
+        
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(139, 0, 0, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        .modal-header h2 {
+            font-family: 'Ma Shan Zheng', cursive;
+            color: var(--accent-gold);
+            font-size: 2.2rem;
+            margin: 0;
+        }
+        
+        .modal-header h2::after {
+            display: none;
+        }
+        
+        .modal-header .subtitle {
+            color: var(--primary-red-light);
+            font-size: 1rem;
+            margin-top: 0.3rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .modal-body p {
+            color: var(--text-dim);
+            line-height: 1.9;
+            margin-bottom: 1.2rem;
+        }
+        
+        .modal-body strong {
+            color: var(--accent-gold);
+        }
+        
+        .modal-body h3 {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.3);
+        }
+        
+        .modal-body ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-body li {
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* 返回顶部 */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(139, 0, 0, 0.8);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .intro-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .intro-main {
+                padding-right: 0;
+            }
+            
+            .worldview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            
+            section {
+                padding: 1.5rem;
+                margin: 3rem 0;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                padding: 0.5rem;
+            }
+            
+            nav a {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.8rem;
+            }
+            
+            .character-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .weapon-grid,
+            .scene-grid,
+            .technique-grid,
+            .quotes-grid,
+            .glossary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .worldview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* 动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* 红灯笼装饰 */
+        .lantern {
+            position: fixed;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        .lantern-body {
+            width: 40px;
+            height: 55px;
+            background: linear-gradient(to bottom, #ff3333, #8b0000);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+            animation: lanternGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes lanternGlow {
+            0% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
+            100% { box-shadow: 0 0 35px rgba(255, 0, 0, 0.6); }
+        }
+        
+        .lantern-top {
+            width: 24px;
+            height: 12px;
+            background: #d4af37;
+            margin: 0 auto -5px;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .lantern-string {
+            width: 2px;
+            height: 25px;
+            background: #d4af37;
+            margin: 0 auto;
+        }
+        
+        .lantern-tassel {
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(to bottom, #d4af37, #8b0000);
+            margin: 0 auto;
+            border-radius: 0 0 2px 2px;
+        }
+        
+        .lantern-1 { top: 15%; left: 3%; animation: sway1 4s ease-in-out infinite; }
+        .lantern-2 { top: 25%; right: 3%; animation: sway2 5s ease-in-out infinite; }
+        .lantern-3 { top: 55%; left: 5%; animation: sway1 4.5s ease-in-out infinite 0.5s; }
+        .lantern-4 { top: 65%; right: 5%; animation: sway2 5.5s ease-in-out infinite 1s; }
+        
+        @keyframes sway1 {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        
+        @keyframes sway2 {
+            0%, 100% { transform: rotate(3deg); }
+            50% { transform: rotate(-3deg); }
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--primary-dark);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-red);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-gold);
+        }
+    </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <div class="hint">✨ 点击屏幕创造星星，拖动连接它们</div>
-  <div class="stats">星星: <span id="starCount">0</span></div>
-
-  <script>
-    const canvas = document.getElementById('canvas')
-    const ctx = canvas.getContext('2d')
-    const stars = []
-    const lines = []
-
-    let width, height
-    let lastTouchX, lastTouchY
-    let isDrawing = false
-
-    function resize() {
-      width = window.innerWidth
-      height = window.innerHeight
-      canvas.width = width
-      canvas.height = height
-      initStars()
-    }
-
-    function initStars() {
-      stars.length = 0
-      lines.length = 0
-      const count = Math.floor((width * height) / 15000)
-      for (let i = 0; i < count; i++) {
-        stars.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          size: Math.random() * 2 + 0.5,
-          opacity: Math.random() * 0.5 + 0.2,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3
-        })
-      }
-      document.getElementById('starCount').textContent = stars.length
-    }
-
-    function addStar(x, y) {
-      stars.push({
-        x, y,
-        size: Math.random() * 3 + 1,
-        opacity: 1,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        isNew: true
-      })
-      document.getElementById('starCount').textContent = stars.length
-    }
-
-    function connectStars(x1, y1, x2, y2) {
-      let nearest1 = null, nearest2 = null
-      let dist1 = Infinity, dist2 = Infinity
-
-      stars.forEach(s => {
-        const d1 = Math.hypot(s.x - x1, s.y - y1)
-        const d2 = Math.hypot(s.x - x2, s.y - y2)
-        if (d1 < dist1) { dist1 = d1; nearest1 = s }
-        if (d2 < dist2) { dist2 = d2; nearest2 = s }
-      })
-
-      if (nearest1 && nearest2 && nearest1 !== nearest2 && dist1 < 80 && dist2 < 80) {
-        lines.push({
-          x1: nearest1.x, y1: nearest1.y,
-          x2: nearest2.x, y2: nearest2.y,
-          opacity: 0.6,
-          life: 100
-        })
-      }
-    }
-
-    function animate() {
-      ctx.fillStyle = 'rgba(10, 10, 26, 0.1)'
-      ctx.fillRect(0, 0, width, height)
-
-      stars.forEach(s => {
-        s.x += s.vx
-        s.y += s.vy
-
-        if (s.x < 0) s.x = width
-        if (s.x > width) s.x = 0
-        if (s.y < 0) s.y = height
-        if (s.y > height) s.y = 0
-
-        if (s.isNew) {
-          s.opacity = Math.min(1, s.opacity + 0.05)
-          if (s.opacity >= 1) s.isNew = false
+    <!-- 背景效果 -->
+    <div class="fog"><div class="fog-layer"></div></div>
+    <div class="particles" id="particles"></div>
+    
+    <!-- 红灯笼装饰 -->
+    <div class="lantern lantern-1">
+        <div class="lantern-string"></div>
+        <div class="lantern-top"></div>
+        <div class="lantern-body"></div>
+        <div class="lantern-tassel"></div>
+    </div>
+    <div class="lantern lantern-2">
+        <div class="lantern-string"></div>
+        <div class="lantern-top"></div>
+        <div class="lantern-body"></div>
+        <div class="lantern-tassel"></div>
+    </div>
+    <div class="lantern lantern-3">
+        <div class="lantern-string"></div>
+        <div class="lantern-top"></div>
+        <div class="lantern-body"></div>
+        <div class="lantern-tassel"></div>
+    </div>
+    <div class="lantern lantern-4">
+        <div class="lantern-string"></div>
+        <div class="lantern-top"></div>
+        <div class="lantern-body"></div>
+        <div class="lantern-tassel"></div>
+    </div>
+    
+    <!-- 头部 -->
+    <header>
+        <div class="title-container">
+            <div class="title-ornament">☯ ☰ ☵</div>
+            <h1>民间山野怪谈</h1>
+            <p class="subtitle">行一生江湖 · 讲一段民间鬼事</p>
+            <p class="tagline">有一种奇人，不但能帮人起坟下葬，点选宅邸，还可以断生死，道天机，除邪煞，过阴曹……</p>
+            <div class="author-info">
+                <div class="label">作者</div>
+                <div class="name">潘海根</div>
+            </div>
+        </div>
+        <div class="scroll-hint">
+            <span>向下探索</span>
+            <div class="arrow"></div>
+        </div>
+    </header>
+    
+    <!-- 导航 -->
+    <nav>
+        <ul>
+            <li><a href="#intro">作品简介</a></li>
+            <li><a href="#worldview">世界观</a></li>
+            <li><a href="#characters">人物图鉴</a></li>
+            <li><a href="#weapons">兵器法器</a></li>
+            <li><a href="#scenes">场景地点</a></li>
+            <li><a href="#techniques">招式术法</a></li>
+            <li><a href="#chapters">章节脉络</a></li>
+            <li><a href="#quotes">经典语录</a></li>
+            <li><a href="#glossary">术语表</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 主内容 -->
+    <main>
+        <!-- 搜索框 -->
+        <div class="search-container">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="搜索人物、兵器、场景、招式、章节..." id="searchInput">
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        
+        <!-- 作品简介 -->
+        <section id="intro" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">壹</span>
+                <h2>作品简介</h2>
+                <p class="section-desc">一部讲述阴阳先生传奇经历的灵异小说</p>
+            </div>
+            
+            <div class="intro-content">
+                <div class="intro-main">
+                    <h3>关于本书</h3>
+                    <div class="intro-text">
+                        <p>《民间山野怪谈》又名《民间风水怪谈》，是潘海根创作的一部灵异题材网络小说，全书共391章，已完结。小说以中国传统民间信仰为背景，讲述了一位阴阳先生游走于阴阳两界的传奇故事。</p>
+                        
+                        <p>故事的主人公陈长生，从小被爷爷抚养长大。爷爷神秘失踪后，他继承了阴阳先生的衣钵，身负特殊使命，开始游走于阴阳两界。他精通各种阴阳术法，能够起坟下葬、点选宅邸、断生死、道天机、除邪煞、过阴曹，救人度命，去灾免祸。</p>
+                        
+                        <p>在这漫长的旅程中，陈长生遭遇了无数离奇诡异的事件：鬼唱戏、死人沟的冤魂、苗家村的巫术、十里坟的凶灵、冥山遂道的阴间使者……每一次经历都让他成长为更强大的阴阳先生。</p>
+                        
+                        <div class="intro-quote">
+                            "行一生江湖，讲一段民间鬼事。民间山野怪谈，一直充斥着人们的茶余饭后，民间关于山野鬼神之事更是传的五花八门。"
+                        </div>
+                        
+                        <p>本书融合了中国民间传说、风水文化、阴阳术法、出马仙信仰等多种元素，构建了一个完整的灵异世界观。书中不仅有惊心动魄的冒险，还有感人至深的情感纠葛，以及对善恶因果的深刻探讨。</p>
+                    </div>
+                </div>
+                
+                <div class="intro-stats">
+                    <div class="stat-box">
+                        <div class="number">391</div>
+                        <div class="label">章回总数</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">20+</div>
+                        <div class="label">核心人物</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">18</div>
+                        <div class="label">术法招式</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">25+</div>
+                        <div class="label">场景地点</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">12</div>
+                        <div class="label">兵器法器</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">50+</div>
+                        <div class="label">章节故事</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 世界观 -->
+        <section id="worldview" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">贰</span>
+                <h2>世界观</h2>
+                <p class="section-desc">阴阳两界，万物有灵</p>
+            </div>
+            
+            <div class="worldview-grid">
+                <div class="worldview-card">
+                    <div class="worldview-icon">☯</div>
+                    <h4>阴阳之道</h4>
+                    <p>天地万物皆分阴阳，阳为生，阴为死。阴阳先生沟通两界，维护阴阳平衡。善用阴阳术法，可救人度命；滥用则遭天谴。</p>
+                </div>
+                <div class="worldview-card">
+                    <div class="worldview-icon">🏚️</div>
+                    <h4>风水之术</h4>
+                    <p>山川河流皆有气脉，宅邸坟茔讲究风水。龙脉、穴位、明堂、水口，风水之道关乎一家兴衰、一地安宁。</p>
+                </div>
+                <div class="worldview-card">
+                    <div class="worldview-icon">👻</div>
+                    <h4>鬼神之说</h4>
+                    <p>人死为鬼，鬼入黄泉。冤魂不散者，或为厉鬼；心存执念者，滞留人间。超度亡魂，化解怨气，乃阴阳先生职责。</p>
+                </div>
+                <div class="worldview-card">
+                    <div class="worldview-icon">🐍</div>
+                    <h4>仙家信仰</h4>
+                    <p>东北出马仙体系，胡黄白柳灰五大家仙。蛇仙常太奶、黄仙黄皮子、狐仙狐娘娘，各有神通，保佑一方。</p>
+                </div>
+                <div class="worldview-card">
+                    <div class="worldview-icon">📜</div>
+                    <h4>符咒阵法</h4>
+                    <p>符纸咒语，阵法结界。七星锁魂桩锁住厉鬼，三绝冥棺阵镇压邪物，迷魂局困敌心智。术法精妙，变化无穷。</p>
+                </div>
+                <div class="worldview-card">
+                    <div class="worldview-icon">⚖️</div>
+                    <h4>因果报应</h4>
+                    <p>善有善报，恶有恶报。种因得果，天道轮回。阴阳先生断生死、道天机，亦需遵循天道，不可妄为。</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 人物图鉴 -->
+        <section id="characters" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">叁</span>
+                <h2>人物图鉴</h2>
+                <p class="section-desc">阴阳两界，众生百态</p>
+            </div>
+            
+            <!-- 主角 -->
+            <div class="character-category">
+                <h3 class="category-title">🌟 主要人物</h3>
+                <div class="character-grid">
+                    <div class="character-card" onclick="showModal('chen-changsheng')">
+                        <div class="card-header">
+                            <div class="character-avatar">陈</div>
+                            <div>
+                                <h3>陈长生</h3>
+                                <div class="role">主角 · 阴阳先生</div>
+                            </div>
+                        </div>
+                        <p>从小被爷爷抚养长大，身负特殊使命。精通阴阳术法，游走于阴阳两界，是故事的核心人物。正直善良，重情重义。</p>
+                        <div class="character-tags">
+                            <span class="tag">阴阳先生</span>
+                            <span class="tag">主角</span>
+                            <span class="tag">正派</span>
+                            <span class="tag">成长型</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('yang-qing')">
+                        <div class="card-header">
+                            <div class="character-avatar">杨</div>
+                            <div>
+                                <h3>杨晴</h3>
+                                <div class="role">女主角 · 陈长生挚爱</div>
+                            </div>
+                        </div>
+                        <p>聪慧勇敢的女子，与陈长生相识相知，共同经历诸多离奇事件。对陈长生深情不渝，最终与其厮守。</p>
+                        <div class="character-tags">
+                            <span class="tag">女主角</span>
+                            <span class="tag">挚爱</span>
+                            <span class="tag">勇敢</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('lingyun')">
+                        <div class="card-header">
+                            <div class="character-avatar">灵</div>
+                            <div>
+                                <h3>灵韵</h3>
+                                <div class="role">神秘女子 · 地祖弟子</div>
+                            </div>
+                        </div>
+                        <p>身世复杂，与陈长生有宿命纠葛。地祖的弟子，实力深不可测。最终消失，留下无尽遗憾。</p>
+                        <div class="character-tags">
+                            <span class="tag">神秘</span>
+                            <span class="tag">宿命</span>
+                            <span class="tag">悲剧</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('chen-ergou')">
+                        <div class="card-header">
+                            <div class="character-avatar">二</div>
+                            <div>
+                                <h3>陈二狗</h3>
+                                <div class="role">伙伴 · 忠诚助手</div>
+                            </div>
+                        </div>
+                        <p>普通村民出身，后成为陈长生的得力助手。虽然能力有限，但忠心耿耿，多次与陈长生共患难。</p>
+                        <div class="character-tags">
+                            <span class="tag">伙伴</span>
+                            <span class="tag">忠诚</span>
+                            <span class="tag">普通人</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 师长 -->
+            <div class="character-category">
+                <h3 class="category-title">📚 师长前辈</h3>
+                <div class="character-grid">
+                    <div class="character-card" onclick="showModal('qingyunzi')">
+                        <div class="card-header">
+                            <div class="character-avatar">青</div>
+                            <div>
+                                <h3>青云子</h3>
+                                <div class="role">道长 · 阴阳大师</div>
+                            </div>
+                        </div>
+                        <p>正派道长，深谙阴阳之道。与陈长生有师徒之谊，传授其诸多术法，在关键时刻给予指导与帮助。</p>
+                        <div class="character-tags">
+                            <span class="tag">道长</span>
+                            <span class="tag">导师</span>
+                            <span class="tag">正派</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('yang-banxian')">
+                        <div class="card-header">
+                            <div class="character-avatar">杨</div>
+                            <div>
+                                <h3>杨半仙</h3>
+                                <div class="role">风水先生</div>
+                            </div>
+                        </div>
+                        <p>深谙风水之道的先生，精通象形风水、堪舆之术。在故事中多次为陈长生指点迷津。</p>
+                        <div class="character-tags">
+                            <span class="tag">风水师</span>
+                            <span class="tag">前辈</span>
+                            <span class="tag">指路人</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('dizu')">
+                        <div class="card-header">
+                            <div class="character-avatar">地</div>
+                            <div>
+                                <h3>地祖</h3>
+                                <div class="role">神秘强者 · 灵韵之师</div>
+                            </div>
+                        </div>
+                        <p>实力深不可测的神秘人物，灵韵的师父。在故事后期出现，展现出超凡的实力，改变了整个局势。</p>
+                        <div class="character-tags">
+                            <span class="tag">强者</span>
+                            <span class="tag">神秘</span>
+                            <span class="tag">后期关键</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('ma-nanshan')">
+                        <div class="card-header">
+                            <div class="character-avatar">马</div>
+                            <div>
+                                <h3>马南山</h3>
+                                <div class="role">阴阳先生</div>
+                            </div>
+                        </div>
+                        <p>另一位阴阳先生，与陈长生有交集。各有所长，在阴阳两界都有一定影响力，亦敌亦友。</p>
+                        <div class="character-tags">
+                            <span class="tag">阴阳先生</span>
+                            <span class="tag">同行</span>
+                            <span class="tag">亦敌亦友</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 反派 -->
+            <div class="character-category">
+                <h3 class="category-title">⚔️ 对手反派</h3>
+                <div class="character-grid">
+                    <div class="character-card" onclick="showModal('yang-quan')">
+                        <div class="card-header">
+                            <div class="character-avatar">权</div>
+                            <div>
+                                <h3>杨权</h3>
+                                <div class="role">反派 · 心计深沉</div>
+                            </div>
+                        </div>
+                        <p>与杨晴有家族关系，心计深沉，多次与陈长生作对。为达目的不择手段，是故事中的重要反派。</p>
+                        <div class="character-tags">
+                            <span class="tag">反派</span>
+                            <span class="tag">心计</span>
+                            <span class="tag">敌对</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('yu-lingshuang')">
+                        <div class="card-header">
+                            <div class="character-avatar">玉</div>
+                            <div>
+                                <h3>玉灵霜</h3>
+                                <div class="role">复杂角色 · 悲剧人物</div>
+                            </div>
+                        </div>
+                        <p>与多个势力有关联的重要女性角色，命运多舛。最终成为废人，在懊悔中度过余生。</p>
+                        <div class="character-tags">
+                            <span class="tag">悲剧</span>
+                            <span class="tag">懊悔</span>
+                            <span class="tag">复杂</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('wu-gui')">
+                        <div class="card-header">
+                            <div class="character-avatar">吴</div>
+                            <div>
+                                <h3>吴鬼</h3>
+                                <div class="role">神秘人物 · 特殊能力</div>
+                            </div>
+                        </div>
+                        <p>拥有特殊能力的神秘人物，身份成谜。与多个势力有关联，在故事中扮演重要角色。</p>
+                        <div class="character-tags">
+                            <span class="tag">神秘</span>
+                            <span class="tag">特殊能力</span>
+                            <span class="tag">关键人物</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 仙家灵异 -->
+            <div class="character-category">
+                <h3 class="category-title">🐲 仙家灵异</h3>
+                <div class="character-grid">
+                    <div class="character-card" onclick="showModal('chang-tainai')">
+                        <div class="card-header">
+                            <div class="character-avatar">蛇</div>
+                            <div>
+                                <h3>常太奶/蛇娘娘</h3>
+                                <div class="role">蛇仙 · 保家仙</div>
+                            </div>
+                        </div>
+                        <p>东北出马仙体系中的蛇仙，法力高强。与陈长生有渊源，在关键时刻出手相助。</p>
+                        <div class="character-tags">
+                            <span class="tag">蛇仙</span>
+                            <span class="tag">保家仙</span>
+                            <span class="tag">出马仙</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('tongyinpo')">
+                        <div class="card-header">
+                            <div class="character-avatar">通</div>
+                            <div>
+                                <h3>通阴婆</h3>
+                                <div class="role">特殊职业 · 通灵者</div>
+                            </div>
+                        </div>
+                        <p>能够沟通阴阳的特殊人物，帮助亡魂传话，为生者解忧。在民间有着特殊的地位。</p>
+                        <div class="character-tags">
+                            <span class="tag">通灵</span>
+                            <span class="tag">特殊职业</span>
+                            <span class="tag">民间</span>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" onclick="showModal('saoyeren')">
+                        <div class="card-header">
+                            <div class="character-avatar">扫</div>
+                            <div>
+                                <h3>扫夜人</h3>
+                                <div class="role">特殊职业 · 夜间守护</div>
+                            </div>
+                        </div>
+                        <p>夜间巡逻驱邪的特殊职业，守护一方安宁。虽然不为人知，却默默守护着人间。</p>
+                        <div class="character-tags">
+                            <span class="tag">守护者</span>
+                            <span class="tag">夜行</span>
+                            <span class="tag">驱邪</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 人物关系图 -->
+            <div class="relation-map">
+                <h3>核心人物关系</h3>
+                <div class="relation-visual">
+                    <div class="relation-node">青云子</div>
+                    <span class="relation-line">→师徒→</span>
+                    <div class="relation-node central">陈长生</div>
+                    <span class="relation-line">←挚爱→</span>
+                    <div class="relation-node">杨晴</div>
+                </div>
+                <div class="relation-visual">
+                    <div class="relation-node">地祖</div>
+                    <span class="relation-line">→师徒→</span>
+                    <div class="relation-node">灵韵</div>
+                    <span class="relation-line">←宿命→</span>
+                    <div class="relation-node central">陈长生</div>
+                    <span class="relation-line">→兄弟→</span>
+                    <div class="relation-node">陈二狗</div>
+                </div>
+                <div class="relation-visual">
+                    <div class="relation-node">杨权</div>
+                    <span class="relation-line">←敌对→</span>
+                    <div class="relation-node central">陈长生</div>
+                    <span class="relation-line">←亦敌亦友→</span>
+                    <div class="relation-node">马南山</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 兵器法器 -->
+        <section id="weapons" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">肆</span>
+                <h2>兵器法器</h2>
+                <p class="section-desc">驱邪镇鬼，护佑苍生</p>
+            </div>
+            
+            <div class="weapon-category">
+                <h3 class="category-title">⚔️ 法剑符箓</h3>
+                <div class="weapon-grid">
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🗡️</div>
+                        <div class="weapon-info">
+                            <h4>桃木剑</h4>
+                            <p>以桃木制成的法剑，蕴含纯阳之气，是阴阳先生的标配法器。可驱邪镇鬼，斩杀妖物。</p>
+                            <span class="usage">驱邪 · 镇鬼 · 斩妖</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">📜</div>
+                        <div class="weapon-info">
+                            <h4>黄符/符纸</h4>
+                            <p>以朱砂书写的符箓，配合咒语使用。可封印、驱邪、镇宅、通灵，变化无穷。</p>
+                            <span class="usage">封印 · 驱邪 · 镇宅</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🪬</div>
+                        <div class="weapon-info">
+                            <h4>八卦镜</h4>
+                            <p>以八卦为形的铜镜，可照妖显形，反射邪气，是重要的防御法器。</p>
+                            <span class="usage">照妖 · 防御 · 反射</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">📿</div>
+                        <div class="weapon-info">
+                            <h4>念珠/佛珠</h4>
+                            <p>高僧开光的念珠，可镇压邪祟，净化怨气。手持念珠诵经，可超度亡魂。</p>
+                            <span class="usage">镇压 · 净化 · 超度</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="weapon-category">
+                <h3 class="category-title">🧭 风水工具</h3>
+                <div class="weapon-grid">
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🧭</div>
+                        <div class="weapon-info">
+                            <h4>罗盘</h4>
+                            <p>风水先生必备工具，用于定位、看风水、寻龙点穴。指针可感知阴阳之气。</p>
+                            <span class="usage">定位 · 风水 · 寻龙</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">📏</div>
+                        <div class="weapon-info">
+                            <h4>鲁班尺</h4>
+                            <p>测量风水的专用尺，上有吉凶刻度。建造房屋、安葬死者时必用。</p>
+                            <span class="usage">测量 · 吉凶 · 建造</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🪓</div>
+                        <div class="weapon-info">
+                            <h4>降妖木</h4>
+                            <p>特殊法木，专用于降伏妖邪。以雷击木为佳，蕴含天雷之威。</p>
+                            <span class="usage">降妖 · 伏魔 · 天威</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🚩</div>
+                        <div class="weapon-info">
+                            <h4>百怨幡</h4>
+                            <p>与怨气相关的法幡，可聚集或驱散怨气。用于引渡冤魂，化解怨念。</p>
+                            <span class="usage">聚怨 · 散怨 · 引渡</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="weapon-category">
+                <h3 class="category-title">🔮 阵法法器</h3>
+                <div class="weapon-grid">
+                    <div class="weapon-item">
+                        <div class="weapon-icon">📌</div>
+                        <div class="weapon-info">
+                            <h4>七星锁魂桩</h4>
+                            <p>以七根特殊木桩按北斗七星方位布置，锁住厉鬼魂魄，防止作祟。</p>
+                            <span class="usage">锁魂 · 封印 · 镇压</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">⚰️</div>
+                        <div class="weapon-info">
+                            <h4>三绝冥棺</h4>
+                            <p>与棺材相关的强大阵法，用于镇压强大邪物。三绝齐出，万邪辟易。</p>
+                            <span class="usage">镇压 · 三绝 · 封邪</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🪙</div>
+                        <div class="weapon-info">
+                            <h4>五帝钱</h4>
+                            <p>清朝五位皇帝的铜钱，蕴含国运龙气。用于布阵、辟邪，效果显著。</p>
+                            <span class="usage">布阵 · 辟邪 · 国运</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weapon-item">
+                        <div class="weapon-icon">🐕</div>
+                        <div class="weapon-info">
+                            <h4>黑狗血</h4>
+                            <p>民间常用驱邪物品，纯阳之血可破除邪术，克制阴邪之物。</p>
+                            <span class="usage">破邪 · 克阴 · 驱散</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 场景地点 -->
+        <section id="scenes" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">伍</span>
+                <h2>场景地点</h2>
+                <p class="section-desc">阴阳两界，诡异之地</p>
+            </div>
+            
+            <div class="scene-tabs">
+                <div class="scene-tab active" onclick="switchScene('yinjian')">阴间场景</div>
+                <div class="scene-tab" onclick="switchScene('xiongdi')">阳间凶地</div>
+                <div class="scene-tab" onclick="switchScene('renwen')">人文场景</div>
+                <div class="scene-tab" onclick="switchScene('teshu')">特殊场景</div>
+            </div>
+            
+            <!-- 阴间场景 -->
+            <div class="scene-content active" id="scene-yinjian">
+                <div class="scene-grid">
+                    <div class="scene-card">
+                        <h4>🛤️ 黄泉路</h4>
+                        <p>通往地府的道路，亡魂必经之路。路两旁开满彼岸花，红艳似血。阴气森森，有鬼差把守。</p>
+                        <span class="chapter-ref">第五十一章 黄泉路</span>
+                        <div class="atmosphere">氛围：阴森、凄凉、绝望</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🚇 冥山遂道</h4>
+                        <p>连接阴阳两界的神秘隧道，阴气浓郁。进入其中，可见阴间景象，常有灵异事件发生。</p>
+                        <span class="chapter-ref">第五十章 冥山遂道</span>
+                        <div class="atmosphere">氛围：幽暗、诡异、压抑</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🚗 阴间冥车</h4>
+                        <p>从阴间驶来的车辆，运送亡魂前往地府。生者误入，难以返回。</p>
+                        <span class="chapter-ref">第五十一至五十三章</span>
+                        <div class="atmosphere">氛围：神秘、危险、不可抗拒</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🏯 地府</h4>
+                        <p>亡魂归处，有十殿阎罗、黑白无常、牛头马面。生死簿记录众生寿数。</p>
+                        <span class="chapter-ref">多处提及</span>
+                        <div class="atmosphere">氛围：庄严、恐怖、公正</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🌊 墟河</h4>
+                        <p>神秘的河流，与故事结局息息相关。河水幽深，似有无尽秘密。</p>
+                        <span class="chapter-ref">第三百八十七章 墟河</span>
+                        <div class="atmosphere">氛围：神秘、宿命、终局</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 阳间凶地 -->
+            <div class="scene-content" id="scene-xiongdi">
+                <div class="scene-grid">
+                    <div class="scene-card">
+                        <h4>💀 死人沟</h4>
+                        <p>死亡气息浓郁的地方，冤魂聚集，生人勿近。曾发生惨案，怨气冲天。</p>
+                        <span class="chapter-ref">第三章 死人沟</span>
+                        <div class="atmosphere">氛围：死亡、怨恨、危险</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>⚰️ 十里坟</h4>
+                        <p>大型墓地，阴气聚集。夜晚常有异象，鬼火点点，冤魂游荡。</p>
+                        <span class="chapter-ref">第三十一章 十里坟</span>
+                        <div class="atmosphere">氛围：阴森、恐怖、死亡</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>⛩️ 鬼祠</h4>
+                        <p>供奉鬼神的祠堂，阴气深重。常有诡异之事发生，是禁入之地。</p>
+                        <span class="chapter-ref">第三十三章 鬼祠</span>
+                        <div class="atmosphere">氛围：诡异、禁忌、阴冷</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🕳️ 坟场</h4>
+                        <p>乱葬岗，埋葬无主孤魂。夜晚阴气最重，易招邪祟。</p>
+                        <span class="chapter-ref">第二十一章</span>
+                        <div class="atmosphere">氛围：荒凉、孤寂、危险</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🌲 林中老宅</h4>
+                        <p>深山老林中的古老宅院，年久失修，常有灵异事件发生。</p>
+                        <span class="chapter-ref">第九十八至九十九章</span>
+                        <div class="atmosphere">氛围：荒废、神秘、惊悚</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 人文场景 -->
+            <div class="scene-content" id="scene-renwen">
+                <div class="scene-grid">
+                    <div class="scene-card">
+                        <h4>🏘️ 苗家村</h4>
+                        <p>苗族聚居地，有独特的巫术传统和神秘仪式。宗祠中供奉着祖先牌位。</p>
+                        <span class="chapter-ref">第三十二至三十三章</span>
+                        <div class="atmosphere">氛围：神秘、古老、异域</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🏠 陈家村</h4>
+                        <p>陈长生的故乡，故事开始的地方。看似平静的小村，却暗藏玄机。</p>
+                        <span class="chapter-ref">第一章起</span>
+                        <div class="atmosphere">氛围：平静、朴实、暗藏危机</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🏛️ 玄堂</h4>
+                        <p>与阴阳术法相关的特殊场所，是修炼和做法的地方。</p>
+                        <span class="chapter-ref">第二十二章 玄堂</span>
+                        <div class="atmosphere">氛围：庄严、神秘、神圣</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🏮 杨家宅邸</h4>
+                        <p>杨家的宅院，发生过诸多诡异事件。宅中藏有秘密。</p>
+                        <span class="chapter-ref">第五十四章</span>
+                        <div class="atmosphere">氛围：复杂、暗流涌动</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🏡 古宅</h4>
+                        <p>年久失修的古老宅院，墙壁斑驳，阴气深重。</p>
+                        <span class="chapter-ref">第九十八章</span>
+                        <div class="atmosphere">氛围：荒废、阴森、古老</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 特殊场景 -->
+            <div class="scene-content" id="scene-teshu">
+                <div class="scene-grid">
+                    <div class="scene-card">
+                        <h4>🌊 东海</h4>
+                        <p>故事后期的重要场景，诸多决战在此展开。波涛汹涌，暗藏杀机。</p>
+                        <span class="chapter-ref">第三百八十六章 东海</span>
+                        <div class="atmosphere">氛围：壮阔、决战、宿命</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>⛰️ 冥山</h4>
+                        <p>阴气汇聚之山，通往冥界的入口所在。山中常有异象。</p>
+                        <span class="chapter-ref">第五十章</span>
+                        <div class="atmosphere">氛围：阴森、神秘、危险</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🌳 灵参所在地</h4>
+                        <p>深山中的神秘之地，生长着珍贵灵参。有山神守护。</p>
+                        <span class="chapter-ref">第八十八至九十三章</span>
+                        <div class="atmosphere">氛围：神秘、危险、宝藏</div>
+                    </div>
+                    
+                    <div class="scene-card">
+                        <h4>🏔️ 山神庙</h4>
+                        <p>供奉山神的庙宇，是采参人祈福之地。山神老爷的传说流传已久。</p>
+                        <span class="chapter-ref">第九十一章</span>
+                        <div class="atmosphere">氛围：神圣、神秘、敬畏</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 招式术法 -->
+        <section id="techniques" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">陆</span>
+                <h2>招式术法</h2>
+                <p class="section-desc">阴阳术法，玄妙无穷</p>
+            </div>
+            
+            <div class="technique-grid">
+                <!-- 阴阳术法 -->
+                <div class="technique-card">
+                    <div class="technique-card-header">
+                        <h3>☯ 阴阳术法</h3>
+                    </div>
+                    <div class="technique-list">
+                        <div class="technique-item">
+                            <h4>起坟下葬</h4>
+                            <p>阴阳先生基本技能，正确处理死者安葬，避免尸变，超度亡魂。</p>
+                            <span class="level">基础术法</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>点选宅邸</h4>
+                            <p>风水术，选择吉利的住宅位置，避凶趋吉，保佑家宅平安。</p>
+                            <span class="level">风水术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>断生死</h4>
+                            <p>预测术，推算人的生死命数，预知危险，提前防范。有损阴德。</p>
+                            <span class="level">预测术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>道天机</h4>
+                            <p>泄露天机之术，有损阳寿，需谨慎使用。天机不可泄露。</p>
+                            <span class="level">禁术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>除邪煞</h4>
+                            <p>驱邪术，消除邪气和煞气，保护生者，超度亡者。</p>
+                            <span class="level">驱邪术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>过阴曹</h4>
+                            <p>通灵术，前往阴间办事，查询生死簿，解救亡魂。</p>
+                            <span class="level">通灵术</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 阵法 -->
+                <div class="technique-card">
+                    <div class="technique-card-header">
+                        <h3>🔺 阵法结界</h3>
+                    </div>
+                    <div class="technique-list">
+                        <div class="technique-item">
+                            <h4>七星锁魂桩</h4>
+                            <p>以七根木桩按北斗七星方位布置，锁住厉鬼魂魄，防止作祟。</p>
+                            <span class="level">高级阵法</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>三绝冥棺阵</h4>
+                            <p>与棺材相关的强大阵法，三绝齐出，镇压强大邪物。</p>
+                            <span class="level">秘传阵法</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>迷魂局</h4>
+                            <p>迷惑心智的阵法，困住敌人或邪物，使其迷失方向。</p>
+                            <span class="level">困敌阵法</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>驱魂阵</h4>
+                            <p>驱散怨魂的阵法，可将冤魂引入正途，化解怨气。</p>
+                            <span class="level">超度阵法</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 巫术 -->
+                <div class="technique-card">
+                    <div class="technique-card-header">
+                        <h3>🔮 巫术秘法</h3>
+                    </div>
+                    <div class="technique-list">
+                        <div class="technique-item">
+                            <h4>八字巫术</h4>
+                            <p>通过生辰八字施法，可用于害人或救人。知八字者，可断其命。</p>
+                            <span class="level">巫术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>犁头巫术</h4>
+                            <p>使用犁头进行的巫术，用于驱邪或害人。苗疆流传甚广。</p>
+                            <span class="level">巫术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>五毒降</h4>
+                            <p>使用五种毒物进行的降头，害人之术。中者无药可解。</p>
+                            <span class="level">邪术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>养尸术</h4>
+                            <p>禁忌之术，饲养尸体为己所用。违背天理，必遭天谴。</p>
+                            <span class="level">禁术</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 仙家 -->
+                <div class="technique-card">
+                    <div class="technique-card-header">
+                        <h3>🐲 仙家法术</h3>
+                    </div>
+                    <div class="technique-list">
+                        <div class="technique-item">
+                            <h4>出马仙</h4>
+                            <p>东北仙家体系，动物仙家附体办事。胡黄白柳灰，各有神通。</p>
+                            <span class="level">仙家术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>顶仙</h4>
+                            <p>被仙家选中，成为仙家在人间的代言人。可借仙家之力办事。</p>
+                            <span class="level">仙家术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>请神</h4>
+                            <p>请仙家或神灵附身，借其力量解决问题。需诚心正意。</p>
+                            <span class="level">仙家术</span>
+                        </div>
+                        <div class="technique-item">
+                            <h4>扫夜人术</h4>
+                            <p>特殊职业的术法，夜间巡逻驱邪，守护一方安宁。</p>
+                            <span class="level">守护术</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 术法体系 -->
+            <div style="margin-top: 3rem; padding: 2rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(139,0,0,0.3);">
+                <h3 style="font-family: 'ZCOOL QingKe HuangYou', cursive; color: var(--accent-gold); text-align: center; margin-bottom: 1.5rem;">术法等级体系</h3>
+                <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(139,0,0,0.1); border: 1px solid rgba(139,0,0,0.3);">
+                        <div style="font-family: 'Ma Shan Zheng', cursive; font-size: 1.5rem; color: var(--accent-gold);">入门</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">基础术法</div>
+                    </div>
+                    <div style="color: var(--text-dim); display: flex; align-items: center;">→</div>
+                    <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(139,0,0,0.15); border: 1px solid rgba(139,0,0,0.4);">
+                        <div style="font-family: 'Ma Shan Zheng', cursive; font-size: 1.5rem; color: var(--accent-gold);">精通</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">高级术法</div>
+                    </div>
+                    <div style="color: var(--text-dim); display: flex; align-items: center;">→</div>
+                    <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(139,0,0,0.2); border: 1px solid rgba(139,0,0,0.5);">
+                        <div style="font-family: 'Ma Shan Zheng', cursive; font-size: 1.5rem; color: var(--accent-gold);">大师</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">秘术</div>
+                    </div>
+                    <div style="color: var(--text-dim); display: flex; align-items: center;">→</div>
+                    <div style="text-align: center; padding: 1rem 1.5rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3);">
+                        <div style="font-family: 'Ma Shan Zheng', cursive; font-size: 1.5rem; color: var(--accent-gold);">宗师</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">禁术</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 章节脉络 -->
+        <section id="chapters" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">柒</span>
+                <h2>章节脉络</h2>
+                <p class="section-desc">三百九十一章，一段传奇</p>
+            </div>
+            
+            <div class="timeline-container">
+                <!-- 开篇 -->
+                <div class="timeline-era">
+                    <div class="era-title">📖 开篇 · 陈家村的阴阳先生</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="chapter-num">第一章</span>
+                            <h4>陈家烂脚瘸</h4>
+                            <p>故事开始，介绍陈长生的身世背景，爷爷的神秘失踪，以及他成为阴阳先生的契机。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第二章</span>
+                            <h4>鬼唱戏</h4>
+                            <p>村中发生诡异事件，夜里有人唱戏，却不见人影。陈长生初涉阴阳之事。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三章</span>
+                            <h4>死人沟</h4>
+                            <p>陈长生进入死人沟，遭遇冤魂，见识阴间景象，开始成长之路。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 成长 -->
+                <div class="timeline-era">
+                    <div class="era-title">⚔️ 成长 · 初涉江湖</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="chapter-num">第十二章</span>
+                            <h4>七星锁魂桩</h4>
+                            <p>陈长生首次使用七星锁魂桩，展现其阴阳术法的初步能力。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第十七章</span>
+                            <h4>三绝冥棺阵</h4>
+                            <p>遭遇强大邪物，陈长生布下三绝冥棺阵，实力得到提升。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第二十八章</span>
+                            <h4>八字巫术</h4>
+                            <p>遭遇八字巫术，陈长生见识到巫术的厉害。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 历练 -->
+                <div class="timeline-era">
+                    <div class="era-title">🔥 历练 · 南闯北</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三十一章</span>
+                            <h4>十里坟</h4>
+                            <p>陈长生进入十里坟，遭遇强大邪物，经历生死考验。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三十二至三十三章</span>
+                            <h4>苗家村/鬼祠</h4>
+                            <p>深入苗家村，见识独特的巫术传统，进入鬼祠探险。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第五十至五十三章</span>
+                            <h4>冥山遂道/黄泉路</h4>
+                            <p>进入冥山遂道，首次深入阴间，见识黄泉路、送魂车等阴间景象。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第七十六章</span>
+                            <h4>五毒降</h4>
+                            <p>遭遇五毒降头术，与敌人展开激烈对抗。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 深入 -->
+                <div class="timeline-era">
+                    <div class="era-title">🌊 深入 · 阴阳两界</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="chapter-num">第八十八至九十三章</span>
+                            <h4>寻棒槌/灵参</h4>
+                            <p>进入深山寻找灵参，遭遇山神爷老把头，见识采参人的规矩。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第九十八至一百章</span>
+                            <h4>古宅惊魂/红毛怪</h4>
+                            <p>探索林中老宅，遭遇红毛怪，经历惊心动魄的冒险。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第二百四十八章</span>
+                            <h4>黑无常</h4>
+                            <p>与黑白无常交锋，得知爷爷的消息，故事进入新阶段。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 高潮 -->
+                <div class="timeline-era">
+                    <div class="era-title">⚡ 高潮 · 最终决战</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三百八十三章</span>
+                            <h4>烧山</h4>
+                            <p>陈长生怒火烧山，展现出前所未有的实力。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三百八十六至三百八十七章</span>
+                            <h4>东海/墟河</h4>
+                            <p>前往东海，进入墟河，决战在即。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三百八十九章</span>
+                            <h4>杀遍天下</h4>
+                            <p>陈长生大开杀戒，展现出霸道一面。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="chapter-num">第三百九十一章</span>
+                            <h4>大结局 · 终离别</h4>
+                            <p>故事完结，灵韵消失，陈长生流泪。地祖罢手，玉灵霜成为废人。陈长生与杨晴在一起。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 经典语录 -->
+        <section id="quotes" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">捌</span>
+                <h2>经典语录</h2>
+                <p class="section-desc">那些令人难忘的话语</p>
+            </div>
+            
+            <div class="quotes-grid">
+                <div class="quote-card">
+                    <div class="quote-text">行一生江湖，讲一段民间鬼事。</div>
+                    <div class="quote-source">—— 全书开篇</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">有一种奇人，不但能帮人起坟下葬，点选宅邸，还可以断生死，道天机，除邪煞，过阴曹，救人度命，去灾免祸。</div>
+                    <div class="quote-source">—— 关于阴阳先生</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">我是阴阳先生，走南闯北去过中国大江南北，讲一讲中国百年来民间山野灵怪之事。</div>
+                    <div class="quote-source">—— 陈长生</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">天道公正，因果报应，丝毫不爽。</div>
+                    <div class="quote-source">—— 第六十四章</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">罢手吧，没有那个必要了。</div>
+                    <div class="quote-source">—— 地祖，第三百九十一章</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">入这墟河，真的无法回头吗？</div>
+                    <div class="quote-source">—— 陈长生，第三百九十一章</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">民间关于山野鬼神之事更是传的五花八门。</div>
+                    <div class="quote-source">—— 全书引言</div>
+                </div>
+                
+                <div class="quote-card">
+                    <div class="quote-text">她回来了，而她却消失了。</div>
+                    <div class="quote-source">—— 第三百九十一章</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 术语表 -->
+        <section id="glossary" class="fade-in">
+            <div class="section-header">
+                <span class="section-number">玖</span>
+                <h2>术语表</h2>
+                <p class="section-desc">书中专有名词解释</p>
+            </div>
+            
+            <div class="glossary-grid">
+                <dl class="glossary-item">
+                    <dt>阴阳先生</dt>
+                    <dd>沟通阴阳两界的特殊职业，能起坟下葬、断生死、除邪煞。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>出马仙</dt>
+                    <dd>东北民间信仰，动物修炼成仙后附体人类办事。胡黄白柳灰为五大家仙。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>风水</dt>
+                    <dd>中国传统文化，研究人与自然环境的关系，涉及宅邸、坟茔的选址布局。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>符箓</dt>
+                    <dd>以朱砂书写的特殊符号，配合咒语使用，可驱邪、封印、镇宅。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>黄泉路</dt>
+                    <dd>通往地府的道路，亡魂必经之路。路两旁开满彼岸花。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>生死簿</dt>
+                    <dd>记录众生寿数的簿册，由地府掌管。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>黑白无常</dt>
+                    <dd>地府鬼差，负责勾魂摄魄，将亡魂押往地府。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>牛头马面</dt>
+                    <dd>地府鬼差，形象为牛头人身、马头人身，负责守卫和押送。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>厉鬼</dt>
+                    <dd>含有强烈怨气的鬼魂，具有攻击性，需特殊方法超度或镇压。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>荫尸</dt>
+                    <dd>不腐烂的尸体，可能尸变，需特殊处理。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>赶魂阴路</dt>
+                    <dd>将亡魂引渡到阴间的仪式，需在特定时间进行。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>顶仙</dt>
+                    <dd>被仙家选中成为代言人，可借仙家之力办事。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>五毒降</dt>
+                    <dd>以五种毒物为媒介的降头术，害人之术，中者难解。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>七星锁魂桩</dt>
+                    <dd>以七根木桩按北斗七星方位布置，锁住魂魄的阵法。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>三绝冥棺阵</dt>
+                    <dd>与棺材相关的强大阵法，用于镇压邪物。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>扫夜人</dt>
+                    <dd>夜间巡逻驱邪的特殊职业，守护一方安宁。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>通阴婆</dt>
+                    <dd>能够沟通阴阳的特殊人物，帮助亡魂传话。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>降妖木</dt>
+                    <dd>专用于降伏妖邪的法木，以雷击木为佳。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>百怨幡</dt>
+                    <dd>与怨气相关的法幡，可聚集或驱散怨气。</dd>
+                </dl>
+                
+                <dl class="glossary-item">
+                    <dt>墟河</dt>
+                    <dd>神秘河流，与故事结局息息相关。</dd>
+                </dl>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer>
+        <div class="footer-ornament">☯</div>
+        <p class="quote">"行一生江湖，讲一段民间鬼事"</p>
+        <div class="info">
+            <p>《民间山野怪谈》· 潘海根 著</p>
+            <p>本站为学习交流使用，内容版权归原作者所有</p>
+        </div>
+        <div class="copyright">
+            <p>本站致力于整理和展示《民间山野怪谈》的精彩内容</p>
+            <p>如有内容错误或侵权，请联系删除</p>
+        </div>
+    </footer>
+    
+    <!-- 模态框 -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal()">✕</span>
+                <div id="modalTitle"></div>
+                <div id="modalSubtitle" class="subtitle"></div>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+    
+    <!-- 返回顶部 -->
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</div>
+    
+    <script>
+        // 粒子效果
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                container.appendChild(particle);
+            }
         }
-
-        ctx.beginPath()
-        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`
-        ctx.fill()
-
-        ctx.beginPath()
-        ctx.arc(s.x, s.y, s.size * 2, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity * 0.3})`
-        ctx.fill()
-      })
-
-      stars.forEach((s1, i) => {
-        stars.slice(i + 1).forEach(s2 => {
-          const dist = Math.hypot(s1.x - s2.x, s1.y - s2.y)
-          if (dist < 100) {
-            ctx.beginPath()
-            ctx.moveTo(s1.x, s1.y)
-            ctx.lineTo(s2.x, s2.y)
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 * (1 - dist / 100)})`
-            ctx.lineWidth = 0.5
-            ctx.stroke()
-          }
-        })
-      })
-
-      lines.forEach((l, i) => {
-        l.life--
-        if (l.life <= 0) {
-          lines.splice(i, 1)
-          return
+        createParticles();
+        
+        // 人物详细信息
+        const characterData = {
+            'chen-changsheng': {
+                name: '陈长生',
+                subtitle: '主角 · 阴阳先生',
+                description: `
+                    <p><strong>身份：</strong>阴阳先生，故事的主人公。</p>
+                    <p><strong>背景：</strong>从小被爷爷抚养长大，爷爷神秘失踪后，继承了阴阳先生的衣钵，身负特殊使命游走于阴阳两界。</p>
+                    <h3>能力</h3>
+                    <ul>
+                        <li>起坟下葬 — 正确处理死者安葬，避免尸变</li>
+                        <li>点选宅邸 — 选择吉利的住宅位置</li>
+                        <li>断生死 — 推算人的生死命数</li>
+                        <li>道天机 — 泄露天机（有损阳寿）</li>
+                        <li>除邪煞 — 消除邪气和煞气</li>
+                        <li>过阴曹 — 前往阴间办事</li>
+                    </ul>
+                    <h3>性格</h3>
+                    <p>正直善良，有担当，重情义。面对各种离奇事件和凶险风水，他始终坚守本心，用阴阳术法保护生者、超度亡者。</p>
+                    <h3>感情</h3>
+                    <p>与杨晴相识相知，最终走到一起；与灵韵有宿命纠葛，留下遗憾。</p>
+                    <h3>成长轨迹</h3>
+                    <p>从一个懵懂少年，逐渐成长为独当一面的阴阳先生，经历了无数生死考验。最终在墟河做出抉择，与杨晴相守。</p>
+                `
+            },
+            'yang-qing': {
+                name: '杨晴',
+                subtitle: '女主角 · 陈长生挚爱',
+                description: `
+                    <p><strong>身份：</strong>故事的女主角，陈长生的挚爱。</p>
+                    <h3>性格</h3>
+                    <p>聪慧勇敢，对陈长生深情不渝。在面对危险时，她不退缩，与陈长生共同经历诸多离奇事件。</p>
+                    <h3>与主角关系</h3>
+                    <p>与陈长生从相识到相爱，是陈长生最重要的精神支柱。无论陈长生遭遇什么困难，她都始终陪伴在侧。</p>
+                    <h3>结局</h3>
+                    <p>最终与陈长生在一起，相守一生。在故事结尾，她等到了陈长生的归来。</p>
+                `
+            },
+            'lingyun': {
+                name: '灵韵',
+                subtitle: '神秘女子 · 地祖弟子',
+                description: `
+                    <p><strong>身份：</strong>地祖的弟子，身世复杂的神秘女子。</p>
+                    <h3>背景</h3>
+                    <p>来历神秘，是地祖的弟子，实力深不可测。与陈长生有宿命纠葛，情感复杂。</p>
+                    <h3>与主角关系</h3>
+                    <p>与陈长生有宿命纠葛，两人之间的情感复杂而深沉。</p>
+                    <h3>结局</h3>
+                    <p>最终消失，留下无尽遗憾。她的离去让陈长生流泪，也让读者唏嘘。"她回来了，而她却消失了。"</p>
+                `
+            },
+            'chen-ergou': {
+                name: '陈二狗',
+                subtitle: '伙伴 · 忠诚助手',
+                description: `
+                    <p><strong>身份：</strong>陈长生的好兄弟，最忠诚的伙伴。</p>
+                    <h3>背景</h3>
+                    <p>普通村民出身，后成为陈长生的得力助手。</p>
+                    <h3>性格</h3>
+                    <p>虽然能力有限，但忠心耿耿，多次与陈长生共患难。代表了普通人在面对超自然力量时的勇气和忠诚。</p>
+                    <h3>与主角关系</h3>
+                    <p>陈长生最信任的伙伴，无论发生什么，都始终站在陈长生身边。</p>
+                `
+            },
+            'qingyunzi': {
+                name: '青云子',
+                subtitle: '道长 · 阴阳大师',
+                description: `
+                    <p><strong>身份：</strong>正派道长，深谙阴阳之道。</p>
+                    <h3>背景</h3>
+                    <p>与陈长生有师徒之谊，传授其诸多术法。在关键时刻给予指导与帮助。</p>
+                    <h3>特点</h3>
+                    <p>正直无私，是陈长生的精神导师。他的教诲影响了陈长生的一生。</p>
+                    <h3>与主角关系</h3>
+                    <p>亦师亦友，传授陈长生阴阳术法，指引他走上正确的道路。</p>
+                `
+            },
+            'yang-banxian': {
+                name: '杨半仙',
+                subtitle: '风水先生',
+                description: `
+                    <p><strong>身份：</strong>深谙风水之道的先生。</p>
+                    <h3>能力</h3>
+                    <p>精通象形风水、堪舆之术，对阴阳之道有深刻理解。</p>
+                    <h3>与主角关系</h3>
+                    <p>在故事中多次为陈长生指点迷津，是他的引路人之一。</p>
+                `
+            },
+            'dizu': {
+                name: '地祖',
+                subtitle: '神秘强者 · 灵韵之师',
+                description: `
+                    <p><strong>身份：</strong>实力深不可测的神秘人物，灵韵的师父。</p>
+                    <h3>实力</h3>
+                    <p>深不可测，在故事后期出现，展现出超凡的实力，改变了整个局势。</p>
+                    <h3>与故事关系</h3>
+                    <p>在故事后期出现，是最终决战的关键人物。他对灵韵有师徒之情，对陈长生的态度复杂。</p>
+                    <h3>结局</h3>
+                    <p>最终罢手，带走了玉灵霜，让其在懊悔中度过余生。</p>
+                `
+            },
+            'ma-nanshan': {
+                name: '马南山',
+                subtitle: '阴阳先生',
+                description: `
+                    <p><strong>身份：</strong>另一位阴阳先生。</p>
+                    <h3>能力</h3>
+                    <p>各有所长，在阴阳两界都有一定影响力。</p>
+                    <h3>与主角关系</h3>
+                    <p>亦敌亦友，互相竞争又互相帮助。两人在阴阳之道上各有见解。</p>
+                `
+            },
+            'yang-quan': {
+                name: '杨权',
+                subtitle: '反派 · 心计深沉',
+                description: `
+                    <p><strong>身份：</strong>故事中的重要反派，与杨晴有家族关系。</p>
+                    <h3>性格</h3>
+                    <p>阴险狡诈，心计深沉，为达目的不择手段。</p>
+                    <h3>与主角关系</h3>
+                    <p>多次与陈长生作对，是主要对手之一。对杨晴有非分之想。</p>
+                `
+            },
+            'yu-lingshuang': {
+                name: '玉灵霜',
+                subtitle: '复杂角色 · 悲剧人物',
+                description: `
+                    <p><strong>身份：</strong>与多个势力有关联的重要女性角色。</p>
+                    <h3>背景</h3>
+                    <p>命运多舛，与多个势力有关联，身世复杂。</p>
+                    <h3>结局</h3>
+                    <p>最终成为废人，在懊悔中度过余生。地祖将她带走，让她余生都在忏悔中度过。</p>
+                `
+            },
+            'wu-gui': {
+                name: '吴鬼',
+                subtitle: '神秘人物 · 特殊能力',
+                description: `
+                    <p><strong>身份：</strong>拥有特殊能力的神秘人物，身份成谜。</p>
+                    <h3>能力</h3>
+                    <p>拥有某种特殊的阴阳能力，具体来历成谜。</p>
+                    <h3>与故事关系</h3>
+                    <p>与多个势力有关联，在故事中扮演重要角色，推动剧情发展。</p>
+                `
+            },
+            'chang-tainai': {
+                name: '常太奶/蛇娘娘',
+                subtitle: '蛇仙 · 保家仙',
+                description: `
+                    <p><strong>身份：</strong>东北出马仙体系中的蛇仙。</p>
+                    <h3>能力</h3>
+                    <p>法力高强，能保佑一方平安。是五大家仙之一的柳仙。</p>
+                    <h3>与主角关系</h3>
+                    <p>与陈长生有渊源，在关键时刻出手相助。</p>
+                `
+            },
+            'tongyinpo': {
+                name: '通阴婆',
+                subtitle: '特殊职业 · 通灵者',
+                description: `
+                    <p><strong>身份：</strong>能够沟通阴阳的特殊人物。</p>
+                    <h3>能力</h3>
+                    <p>帮助亡魂传话，为生者解忧。在民间有着特殊的地位。</p>
+                    <h3>特点</h3>
+                    <p>虽然不被常人理解，但在阴阳两界都有着重要的作用。</p>
+                `
+            },
+            'saoyeren': {
+                name: '扫夜人',
+                subtitle: '特殊职业 · 夜间守护',
+                description: `
+                    <p><strong>身份：</strong>夜间巡逻驱邪的特殊职业。</p>
+                    <h3>职责</h3>
+                    <p>守护一方安宁，驱赶夜间的邪祟。</p>
+                    <h3>特点</h3>
+                    <p>虽然不为人知，却默默守护着人间。是阴阳两界的守护者。</p>
+                `
+            }
+        };
+        
+        // 搜索数据
+        const searchData = [
+            // 人物
+            { type: '人物', name: '陈长生', desc: '主角，阴阳先生', section: 'characters' },
+            { type: '人物', name: '杨晴', desc: '女主角，陈长生挚爱', section: 'characters' },
+            { type: '人物', name: '灵韵', desc: '神秘女子，地祖弟子', section: 'characters' },
+            { type: '人物', name: '陈二狗', desc: '陈长生的伙伴', section: 'characters' },
+            { type: '人物', name: '青云子', desc: '道长，阴阳大师', section: 'characters' },
+            { type: '人物', name: '杨半仙', desc: '风水先生', section: 'characters' },
+            { type: '人物', name: '地祖', desc: '神秘强者，灵韵之师', section: 'characters' },
+            { type: '人物', name: '马南山', desc: '阴阳先生', section: 'characters' },
+            { type: '人物', name: '杨权', desc: '反派角色', section: 'characters' },
+            { type: '人物', name: '吴鬼', desc: '神秘人物', section: 'characters' },
+            { type: '人物', name: '玉灵霜', desc: '悲剧人物', section: 'characters' },
+            { type: '人物', name: '常太奶', desc: '蛇仙，保家仙', section: 'characters' },
+            { type: '人物', name: '通阴婆', desc: '通灵者', section: 'characters' },
+            { type: '人物', name: '扫夜人', desc: '夜间守护者', section: 'characters' },
+            // 兵器
+            { type: '兵器', name: '桃木剑', desc: '驱邪镇鬼法器', section: 'weapons' },
+            { type: '兵器', name: '黄符', desc: '封印驱邪符箓', section: 'weapons' },
+            { type: '兵器', name: '八卦镜', desc: '照妖防御法器', section: 'weapons' },
+            { type: '兵器', name: '罗盘', desc: '风水工具', section: 'weapons' },
+            { type: '兵器', name: '鲁班尺', desc: '测量风水的尺', section: 'weapons' },
+            { type: '兵器', name: '降妖木', desc: '降伏妖邪法木', section: 'weapons' },
+            { type: '兵器', name: '百怨幡', desc: '与怨气相关法幡', section: 'weapons' },
+            { type: '兵器', name: '七星锁魂桩', desc: '锁住魂魄阵法', section: 'weapons' },
+            { type: '兵器', name: '三绝冥棺', desc: '镇压邪物阵法', section: 'weapons' },
+            { type: '兵器', name: '五帝钱', desc: '辟邪铜钱', section: 'weapons' },
+            { type: '兵器', name: '黑狗血', desc: '驱邪物品', section: 'weapons' },
+            // 场景
+            { type: '场景', name: '黄泉路', desc: '通往地府的道路', section: 'scenes' },
+            { type: '场景', name: '冥山遂道', desc: '连接阴阳两界隧道', section: 'scenes' },
+            { type: '场景', name: '地府', desc: '亡魂归处', section: 'scenes' },
+            { type: '场景', name: '墟河', desc: '神秘河流', section: 'scenes' },
+            { type: '场景', name: '死人沟', desc: '死亡气息浓郁之地', section: 'scenes' },
+            { type: '场景', name: '十里坟', desc: '大型墓地', section: 'scenes' },
+            { type: '场景', name: '鬼祠', desc: '供奉鬼神的祠堂', section: 'scenes' },
+            { type: '场景', name: '林中老宅', desc: '古老宅院', section: 'scenes' },
+            { type: '场景', name: '苗家村', desc: '苗族聚居地', section: 'scenes' },
+            { type: '场景', name: '玄堂', desc: '阴阳术法场所', section: 'scenes' },
+            { type: '场景', name: '东海', desc: '故事后期场景', section: 'scenes' },
+            { type: '场景', name: '冥山', desc: '阴气汇聚之山', section: 'scenes' },
+            // 招式
+            { type: '招式', name: '起坟下葬', desc: '阴阳先生基本技能', section: 'techniques' },
+            { type: '招式', name: '点选宅邸', desc: '风水术', section: 'techniques' },
+            { type: '招式', name: '断生死', desc: '预测术', section: 'techniques' },
+            { type: '招式', name: '道天机', desc: '泄露天机之术', section: 'techniques' },
+            { type: '招式', name: '除邪煞', desc: '驱邪术', section: 'techniques' },
+            { type: '招式', name: '过阴曹', desc: '通灵术', section: 'techniques' },
+            { type: '招式', name: '七星锁魂桩', desc: '锁魂阵法', section: 'techniques' },
+            { type: '招式', name: '三绝冥棺阵', desc: '镇压阵法', section: 'techniques' },
+            { type: '招式', name: '迷魂局', desc: '困敌阵法', section: 'techniques' },
+            { type: '招式', name: '八字巫术', desc: '通过生辰八字施法', section: 'techniques' },
+            { type: '招式', name: '犁头巫术', desc: '苗疆巫术', section: 'techniques' },
+            { type: '招式', name: '五毒降', desc: '降头术', section: 'techniques' },
+            { type: '招式', name: '养尸术', desc: '禁忌之术', section: 'techniques' },
+            { type: '招式', name: '出马仙', desc: '东北仙家体系', section: 'techniques' },
+            { type: '招式', name: '顶仙', desc: '仙家附体', section: 'techniques' },
+            // 术语
+            { type: '术语', name: '阴阳先生', desc: '沟通阴阳两界的职业', section: 'glossary' },
+            { type: '术语', name: '出马仙', desc: '东北仙家信仰', section: 'glossary' },
+            { type: '术语', name: '风水', desc: '中国传统文化', section: 'glossary' },
+            { type: '术语', name: '符箓', desc: '朱砂书写的符号', section: 'glossary' },
+            { type: '术语', name: '生死簿', desc: '记录众生寿数', section: 'glossary' },
+            { type: '术语', name: '黑白无常', desc: '地府鬼差', section: 'glossary' },
+            { type: '术语', name: '牛头马面', desc: '地府鬼差', section: 'glossary' },
+            { type: '术语', name: '厉鬼', desc: '含有怨气的鬼魂', section: 'glossary' },
+            // 章节
+            { type: '章节', name: '陈家烂脚瘸', desc: '第一章', section: 'chapters' },
+            { type: '章节', name: '鬼唱戏', desc: '第二章', section: 'chapters' },
+            { type: '章节', name: '死人沟', desc: '第三章', section: 'chapters' },
+            { type: '章节', name: '七星锁魂桩', desc: '第十二章', section: 'chapters' },
+            { type: '章节', name: '十里坟', desc: '第三十一章', section: 'chapters' },
+            { type: '章节', name: '冥山遂道', desc: '第五十章', section: 'chapters' },
+            { type: '章节', name: '红毛怪', desc: '第一百章', section: 'chapters' },
+            { type: '章节', name: '大结局', desc: '第三百九十一章', section: 'chapters' }
+        ];
+        
+        // 搜索功能
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            if (query.length < 1) {
+                searchResults.classList.remove('active');
+                return;
+            }
+            
+            const results = searchData.filter(item => 
+                item.name.toLowerCase().includes(query) || 
+                item.desc.toLowerCase().includes(query) ||
+                item.type.includes(query)
+            );
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = results.map(item => `
+                    <div class="search-result-item" onclick="scrollToSection('${item.section}')">
+                        <span class="search-result-type">${item.type}</span>
+                        <div class="search-result-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.desc}</p>
+                        </div>
+                    </div>
+                `).join('');
+                searchResults.classList.add('active');
+            } else {
+                searchResults.innerHTML = '<div class="search-result-item"><p style="color: var(--text-dim);">未找到相关内容</p></div>';
+                searchResults.classList.add('active');
+            }
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            setTimeout(() => searchResults.classList.remove('active'), 200);
+        });
+        
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            searchResults.classList.remove('active');
+            searchInput.value = '';
         }
-
-        ctx.beginPath()
-        ctx.moveTo(l.x1, l.y1)
-        ctx.lineTo(l.x2, l.y2)
-        ctx.strokeStyle = `rgba(186, 137, 255, ${l.opacity * (l.life / 100)})`
-        ctx.lineWidth = 1
-        ctx.stroke()
-      })
-
-      requestAnimationFrame(animate)
-    }
-
-    canvas.addEventListener('pointerdown', (e) => {
-      isDrawing = true
-      lastTouchX = e.clientX
-      lastTouchY = e.clientY
-      addStar(e.clientX, e.clientY)
-    })
-
-    canvas.addEventListener('pointermove', (e) => {
-      if (!isDrawing) return
-
-      addStar(e.clientX, e.clientY)
-      connectStars(lastTouchX, lastTouchY, e.clientX, e.clientY)
-
-      lastTouchX = e.clientX
-      lastTouchY = e.clientY
-    })
-
-    canvas.addEventListener('pointerup', () => {
-      isDrawing = false
-    })
-
-    canvas.addEventListener('pointerleave', () => {
-      isDrawing = false
-    })
-
-    window.addEventListener('resize', resize)
-    resize()
-    animate()
-  </script>
+        
+        // 场景切换
+        function switchScene(sceneId) {
+            document.querySelectorAll('.scene-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.scene-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('scene-' + sceneId).classList.add('active');
+        }
+        
+        // 模态框功能
+        function showModal(characterId) {
+            const data = characterData[characterId];
+            if (!data) return;
+            
+            document.getElementById('modalTitle').innerHTML = `<h2>${data.name}</h2>`;
+            document.getElementById('modalSubtitle').textContent = data.subtitle;
+            document.getElementById('modalBody').innerHTML = data.description;
+            
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        // 返回顶部
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        window.addEventListener('scroll', function() {
+            const backToTop = document.getElementById('backToTop');
+            if (window.scrollY > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+        
+        // 滚动动画
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => observer.observe(el));
+        
+        // 平滑滚动
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // 导航高亮
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
